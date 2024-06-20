@@ -1,54 +1,77 @@
-# CSCC09 Project Proposal
+# MindMappers Project Proposal
+
+## Table of Contents
+1. [Project Title](#project-title)
+2. [Team Name](#team-name)
+3. [Team Members](#team-members)
+4. [Brief Description](#brief-description)
+5. [Required Elements](#required-elements)
+6. [Additional Requirements](#additional-requirements)
+7. [Alpha Version Milestones](#alpha-version-milestones)
+8. [Beta Version Milestones](#beta-version-milestones)
+9. [Final Version Milestones](#final-version-milestones)
 
 ## Project Title
-Mind Mappers
+MindMappers
 
 ## Team Name
 VertoHealthJuniors
 
 ## Team Members
-- Zhitao Xu, zhitao.xu@mail.utoronto.ca
-- Kaiwei Zhang, kwei.zhang@mail.utoronto.ca 
-- Yu Yin Lee, felixyy.lee@mail.utoronto.ca
+- Zhitao Xu: [zhitao.xu@mail.utoronto.ca](mailto:zhitao.xu@mail.utoronto.ca)
+- Kaiwei Zhang: [kwei.zhang@mail.utoronto.ca](mailto:kwei.zhang@mail.utoronto.ca)
+- Yu Yin Lee: [felixyy.lee@mail.utoronto.ca](mailto:felixyy.lee@mail.utoronto.ca)
 
-## Brief Description of the Web Application
-Our web application is a collaborative mind mapping tool designed to facilitate real-time brainstorming and idea organization for individuals and teams. The application leverages modern web technologies to provide a seamless and interactive user experience, ensuring that users can easily create, modify, and share their mind maps. Key features include a Single Page Application (SPA) front end built with Angular, a robust backend powered by Express, and seamless integration with third-party services like ChatGPT.
-
-## Table of Contents
-1. [Required Elements](#required-elements)
-2. [Additional Requirements](#additional-requirements)
-3. [Development Milestones](#development-milestones)
+## Brief Description
+Our web application is a collaborative mind-mapping tool designed to facilitate real-time brainstorming and idea organization for individuals and teams. The application leverages modern web technologies to provide a seamless and interactive user experience, ensuring that users can easily create, modify, and share their mind maps. Key features include a Single Page Application (SPA) front end built with Angular, a robust backend powered by Express, and seamless integration with third-party services like ChatGPT.
 
 ## Required Elements
-- **Modern Frameworks**: Utilize Angular to build a dynamic and responsive SPA, ensuring a smooth user experience.
-- **Frontend as SPA**: The frontend is implemented as a Single Page Application (SPA) for fast and efficient user interactions.
-- **Express Backend**: Use Express.js as the core backend API framework to handle requests and serve the application.
-- **RESTful API**: Implement RESTful API endpoints to manage mind map data, user authentication, and other application functionalities.
-- **Docker Deployment**: Containerize the application using Docker for consistent and scalable deployment across different environments.
-- **Mindmap Design**: The website mimics a traditional mind map interface, allowing users to create nodes, link them, and organize ideas visually.
-- **Third-Party API (ChatGPT)**: Integrate with ChatGPT to enable advanced features such as generating content or suggestions within the mind maps.
-- **OAuth 2.0**: Implement OAuth 2.0 for secure and standardized user authentication and authorization.
+- **Use modern frameworks**
+  - Frontend is written in SPA
+- **Use Express as core backend API**
+  - [Express](https://expressjs.com/)
+- **Use RESTful API**
+- **Deploy using Docker**
+- **Use third-party API such as ChatGPT**
+  - During dragging, the text is sent to ChatGPT, which provides an image to display
+  - [ChatGPT API](https://platform.openai.com/docs/api-reference/audio/createSpeech)
+- **Use OAuth 2.0 as the sign-in system**
+  - Google OAuth2 is chosen to be the authorization mechanism
+  - [Google OAuth2](https://developers.google.com/identity/protocols/oauth2)
 
 ## Additional Requirements
-- **Webhook Integration**: Implement webhooks to receive notifications from external services. For example, trigger updates when a collaborative mind map is modified by another user.
-- **Real-Time Collaboration**: Use WebSockets to enable real-time updates, allowing multiple users to work on the same mind map simultaneously and see each other’s changes live.
-- **Long-Running Task Handling**: Offload tasks such as exporting mind maps to images to background workers using a job queue (e.g., Bull for Node.js). Provide users with progress updates and notify them upon completion.
+- **Use webhook**
+  - Implement webhooks to receive notifications from external services
+  - Use webhook to trigger email updates when another user modifies your collaborative mind map
+  - Technology: SendGrid
+  - [SendGrid](https://sendgrid.com/en-us/pricing)
+- **Real-time collaboration**
+  - Different users can work on the same mind map board and see each other’s movements and changes
+  - Socket.io: To connect users that join the same room for a mindmap
+  - [Socket.io](https://socket.io/docs/v4/)
 
-## Development Milestones
+## Alpha Version Milestones
+- Finish basic features of mind map
+  - Create object
+  - 1 object is created and displayed in this milestone
+- Setup backend database
+- Drag and drop feature
+  - [Angular CDK Drag and Drop](https://material.angular.io/cdk/drag-drop/overview)
+- Link feature
+  - Use ctx package to draw the line
+  - [Canvas API Drawing Shapes](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Drawing_shapes)
+- Sign-in / up system
+  - Use Google OAuth2 to login
 
-### Alpha Version Milestones
-- Basic mind map features: Create and organize objects (nodes).
-- Implement drag-and-drop functionality for easy node manipulation.
-- Enable linking between nodes to show relationships.
-- Develop a sign-in/sign-up system using OAuth 2.0.
+## Beta Version Milestones
+- Real-time feature to allow people to collaborate on the mind map board
+  - Use Socket.io
+- Improve UI and be able to create different objects
+- Deployment
+- Link to ChatGPT APIs to generate pictures
 
-### Beta Version Milestones
-- Introduce real-time collaboration features to allow multiple users to work on the same mind map simultaneously.
-- Enhance the user interface and enable the creation of various types of objects.
-- Deploy the application using Docker for consistent environments.
-- Integrate with ChatGPT APIs to generate content or suggestions within mind maps.
-
-### Final Version Milestones
-- Refine and improve features from the Alpha and Beta versions.
-- Add export functionality to save mind maps as images, texts, or other file formats.
-- Implement webhooks to receive and handle notifications from external services, enhancing real-time collaboration and updates.
+## Final Version Milestones
+- Improvement on features mentioned in Alpha and Beta Versions
+- Webhook
+  - Use SendGrid to send emails to owners of the mind map
+- Export functionalities if we still have time (As Images / Texts OR other file types)
