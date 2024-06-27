@@ -1,6 +1,6 @@
-// import { Sequelize } from "sequelize";
+import { Sequelize } from "sequelize";
 
-// export const sequelize = new Sequelize({
-//   dialect: "sqlite",
-//   storage: "mindmappers.sqlite",
-// });
+export const sequelize = new Sequelize({
+  dialect: "sqlite",
+  storage: "mindmappers.sqlite",
+});

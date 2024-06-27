@@ -29,8 +29,12 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"],
-            "scripts": []
+            "styles": [
+              "./node_modules/ng-zorro-antd/ng-zorro-antd.min.css",
+              "node_modules/angular2-draggable/css/resizable.min.css",
+              "src/styles.scss"
+            ],
+            "scripts": ["./node_modules/leader-line/leader-line.min.js"]
           },
           "configurations": {
             "production": {
@@ -83,7 +87,10 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"],
+            "styles": [
+              "./node_modules/ng-zorro-antd/ng-zorro-antd.min.css",
+              "src/styles.scss"
+            ],
             "scripts": []
           }
         }

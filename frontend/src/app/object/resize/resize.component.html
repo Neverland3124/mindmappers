@@ -1,0 +1,34 @@
+<div
+  ngDraggable
+  ngResizable
+  [inBounds]="true"
+  [bounds]="canvas"
+  [rzAspectRatio]="true"
+  rzHandles="all"
+  class="resizable-widget"
+  (rzResizing)="emitResizeEvent($event)"
+  (dblclick)="doubleClick($event)"
+  (contextmenu)="rightClick($event)"
+  (movingOffset)="emitMovingOffset($event)"
+>
+  <!-- (click)="preventFocus($event)" -->
+  <!-- <button class="btn" (click)="addNodeButtonClick($event)">Add Node</button> -->
+  <!-- TODO: set the minimum and maximum size of the resize  -->
+  <textarea
+    class="input-text"
+    placeholder="Input here......"
+    rows="1"
+    [style.fontSize.px]="fontSize"
+    isEditing="false"
+  ></textarea>
+  <!-- (contextmenu)="rightClickTextArea($event)" -->
+  <!-- (rightClick)="preventFocus($event)" -->
+
+  <!--     (click)="preventFocus($event)"
+    (dblclick)="doubleClick($event)"
+    (contextmenu)="rightClick($event)" -->
+
+  <!-- <button class="btn" (click)="deleteButtonClick($event)">Delete</button> -->
+</div>
+
+<!-- TODO: rightClickDoNothing -->

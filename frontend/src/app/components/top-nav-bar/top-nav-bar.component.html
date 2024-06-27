@@ -1,0 +1,11 @@
+<nz-layout class="top-nav">
+  <nz-header class="header">
+    <div class="logo">
+      <span class="logo-text">{{ title }}</span>
+    </div>
+    <div class="user-info">
+      <span>Welcome, {{ user.email }}</span>
+    </div>
+    <button nz-button nzType="primary" (click)="logout()">Logout</button>
+  </nz-header>
+</nz-layout>

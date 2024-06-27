@@ -1,13 +1,36 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet],
+  standalone: false,
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  title = 'mindmappers';
+  title = 'Mind Mappers';
+  signInPage: boolean = true;
+  homePage: boolean = false;
+  topNavBar: boolean = false;
+  user = {
+    email: '',
+    picture: '',
+  };
+
+  constructor() {}
+
+  displaySignInPage(show: boolean) {
+    this.signInPage = show;
+    this.homePage = !show;
+    this.topNavBar = !show;
+  }
+
+  displayHomePage(show: boolean) {
+    this.topNavBar = show;
+    this.homePage = show;
+    this.signInPage = !show;
+  }
+
+  setUser(obj: { email: string; picture: string }) {
+    this.user = obj;
+  }
 }

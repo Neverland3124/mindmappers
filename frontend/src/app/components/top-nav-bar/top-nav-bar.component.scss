@@ -1,0 +1,23 @@
+/* top-navbar.component.scss */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #001529; /* Example background color */
+  color: white; /* Example text color */
+  padding: 0 24px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo .logo-text {
+  margin-left: 12px;
+}
+
+.user-info {
+  font-size: 14px;
+  /* Add additional styles as needed */
+}
