@@ -1,0 +1,104 @@
+<div [hidden]="!showPublicRooms" class="Map">
+  <div class="flex">
+    <h2>Public Rooms</h2>
+    <button nz-button nzType="primary" (click)="createRoom()">
+      Create Room
+    </button>
+  </div>
+  <nz-empty *ngIf="rooms.length === 0" [nzNotFoundContent]="contentTpl" />
+  <div class="all-cards">
+    <nz-card class="room-card" *ngFor="let room of rooms" nzBordered style="width:300px;" [nzTitle]="'room name: ' + room.name">
+      <nz-card-meta [nzTitle]="'Description: ' +room.description"></nz-card-meta>
+      <button
+        nz-button
+        nzType="primary"
+        (click)="joinRoom(room)"
+        class="room-btn"
+      >
+        Join
+      </button>
+      <app-invite-modal
+        [roomName]="room.name"
+        class="room-btn"
+      ></app-invite-modal>
+      <button
+        nz-button
+        nzType="default"
+        nzDanger
+        (click)="deleteRoom(room)"
+        class="room-btn"
+      >
+        Delete
+      </button>
+    </nz-card>
+  </div>
+</div>
+
+<div class="create-room-container" [hidden]="showPublicRooms">
+  <h3 class="margin-top-20">Create Room</h3>
+  <form nz-form #roomForm="ngForm" (ngSubmit)="onSubmit(roomForm)" class="create-room-form">
+    <nz-form-item>
+      <nz-form-label [nzFor]="'roomName'">Room Name</nz-form-label>
+      <nz-form-control>
+        <input
+          nz-input
+          type="text"
+          id="roomName"
+          name="roomName"
+          ngModel
+          required
+        />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzFor]="'roomDescription'"
+        >Description</nz-form-label
+      >
+      <nz-form-control>
+        <textarea
+          nz-input
+          type="text"
+          id="roomDescription"
+          name="roomDescription"
+          ngModel
+          required
+        >
+        </textarea>
+      </nz-form-control>
+    </nz-form-item>
+    <!-- <nz-form-item>
+
+        <nz-form-label>Visibility</nz-form-label>
+        <nz-form-control>
+          <nz-radio-group name="isPublic" ngModel required>
+            <label nz-radio nzValue="true">Public</label>
+            <label nz-radio nzValue="false">Private</label>
+          </nz-radio-group>
+        </nz-form-control>
+      </nz-form-item> -->
+    <div class="form-actions">
+      <button
+        nz-button
+        nzType="default"
+        (click)="back()"
+        class="margin-lr-15"
+        type="button"
+      >
+        Back
+      </button>
+      <button
+        nz-button
+        nzType="primary"
+        type="button"
+        (click)="clear()"
+        class="margin-lr-15"
+      >
+        Clear
+      </button>
+      <button nz-button nzType="primary" type="submit" class="margin-lr-15">
+        Enter
+      </button>
+    </div>
+  </form>
+
+</div>

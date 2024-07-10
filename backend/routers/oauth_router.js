@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 dotenv.config();
 const client_id = process.env.GOOGLE_CLIENT_ID;
 const client_secret = process.env.GOOGLE_CLIENT_SECRET;
-const redirect_url = process.env.REDIRECT_URL;
+const redirect_url = process.env.REDIRECT_URL || "http://localhost:3000/api/oauth2/googlecallback";
 
 export const oauthRouter = Router();
 
@@ -15,11 +15,10 @@ export const oauthRouter = Router();
 const oauth2Client = new google.auth.OAuth2(
   client_id,
   client_secret,
-  redirect_url,
+  redirect_url
 );
 
 // Scopes define the level of access that the application is requesting from the user
-// TODO: how many access do we need, any sensitive data?
 // link to the scope we can choose from: https://developers.google.com/identity/protocols/oauth2/scopes
 const scopes = [
   "https://www.googleapis.com/auth/userinfo.email",
@@ -29,10 +28,10 @@ const scopes = [
 const url = oauth2Client.generateAuthUrl({
   access_type: "offline", // use offline to get refresh token
   scope: scopes,
+  prompt: "consent"
 });
 
-// change from get to post : todo:
-oauthRouter.get("/signin", (req, res) => {
+oauthRouter.post("/signin", (req, res) => {
   // Signin logic here
   res.json({ url });
   // send a fetch to googlecallback
@@ -52,9 +51,7 @@ oauthRouter.get("/googlecallback", async (req, res) => {
     const { data } = await oauth2.userinfo.get();
 
     const user = await User.findOne({ where: { email: data.email } });
-    console.log("user", user);
     if (user) {
-      console.log("user", user.id, user.email, user.picture);
       // If the user already exists, update user information
       await createNewToken(data, tokens);
     } else {
@@ -62,10 +59,10 @@ oauthRouter.get("/googlecallback", async (req, res) => {
     }
 
     const access_token = tokens.access_token;
+    const return_link = process.env.ORIGIN || "http://localhost:3000";
     // regular response with json
-    res.redirect(process.env.ORIGIN + "/?access_token=" + access_token);
+    res.redirect(return_link + "/?access_token=" + access_token);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: error });
   }
 });
@@ -88,6 +85,7 @@ oauthRouter.get("/googlecallback", async (req, res) => {
 
 /*************** Helper Functions ***************/
 async function createNewUserToken(data, tokens) {
+  console.log("Creating new user token", data, tokens);
   // Create the new user and add the token to the database
   const newUser = await User.create({
     email: data.email,
@@ -106,21 +104,12 @@ async function createNewUserToken(data, tokens) {
 }
 
 async function createNewToken(data, tokens) {
+  console.log("Creating new token", data, tokens);
   // Update the picture of the user
   const oldUser = await User.findOne({ where: { email: data.email } });
   await oldUser.update({ picture: data.picture });
 
   // Add a new token to the database
-  console.log(
-    "createNewToken",
-    oldUser.id,
-    tokens.access_token,
-    tokens.refresh_token,
-    tokens.scope,
-    tokens.token_type,
-    tokens.id_token,
-    tokens.expiry_date,
-  );
   await Token.create({
     UserId: oldUser.id,
     access_token: tokens.access_token,
@@ -132,20 +121,17 @@ async function createNewToken(data, tokens) {
   });
 }
 
-// todo: change from get to post
-oauthRouter.post("/signout", async (req, res) => {
+oauthRouter.post("/signout", async (req, res, next) => {
   try {
     const tokenHeader = req.headers.authorization;
     if (!tokenHeader) {
-      // TODO: use 200 or 401?
-      // 409
-      return res.status(200).json({ error: "Authorization token not found." });
+      return res.status(409).json({ error: "Authorization token not found." });
     }
     const access_token = tokenHeader.split(" ")[1]; // Assuming 'Bearer <token>'
 
     if (!access_token) {
       // If the token is not found, still return ok response since signout is successful
-      return res.status(200).json({ message: "token not found" });
+      return res.status(409).json({ message: "token not found" });
     }
 
     // remove token from oauth2Client
@@ -158,7 +144,6 @@ oauthRouter.post("/signout", async (req, res) => {
     await token.destroy();
     return res.status(200).json({ message: "signout successful" });
   } catch (error) {
-    console.error(error);
     return res.status(500).send({ error: error });
   }
 });
@@ -177,7 +162,6 @@ oauthRouter.get("/me", async (req, res) => {
       return res.status(401).json({ error: "Token not provided." });
     }
 
-    console.log("get me access token:", access_token);
     const tokenRecord = await Token.findOne({
       where: { access_token: access_token },
     });
@@ -221,7 +205,6 @@ oauthRouter.get("/me", async (req, res) => {
       picture: data.picture,
     });
   } catch (error) {
-    console.error(error);
     return res.status(400).send({ error: "Error" });
   }
 });

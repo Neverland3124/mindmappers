@@ -1,12 +1,12 @@
 <app-top-nav-bar
-  [hidden]="!topNavBar"
+  *ngIf="topNavBar"
   [user]="user"
   [title]="title"
   (signInPage)="displaySignInPage($event)"
 ></app-top-nav-bar>
 <app-sign-in
-  [hidden]="!signInPage"
+  *ngIf="signInPage"
   (user)="setUser($event)"
   (homePage)="displayHomePage($event)"
 ></app-sign-in>
-<app-home [hidden]="!homePage" [user]="user"></app-home>
+<app-home *ngIf="homePage" [user]="user"></app-home>

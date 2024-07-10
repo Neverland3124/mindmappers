@@ -1,15 +1,10 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  Input,
-  Renderer2,
-  ViewChild,
-  ViewContainerRef,
-} from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { User } from '../../classes/user';
-import { ResizeComponent } from '../../object/resize/resize.component';
-import { LeaderLineService } from '../../services/leader-line.service';
-import { NodeResizeEvent } from '../../object/resize/resize.component';
+import { RoomApiService } from '../../services/room-api.service';
+import { Room } from '../../classes/room';
+import { SocketService } from '../../services/socket.service';
+import { ChangeDetectorRef } from '@angular/core';
+
 @Component({
   selector: 'app-home',
   standalone: false,
@@ -22,103 +17,56 @@ export class HomeComponent {
     picture: '',
   };
 
-  @ViewChild('canvas', { read: ViewContainerRef }) canvas!: ViewContainerRef;
-  // @ViewChild('testuse')
+  showRooms: boolean = true;
+  room: Room = {
+    id: -1,
+    name: '',
+    description: '',
+    owner: -1,
+  };
+
+  public socketService: SocketService = new SocketService();
 
   constructor(
-    private renderer: Renderer2,
-    private leaderLineService: LeaderLineService,
+    private roomApiService: RoomApiService,
+    private changeDetectorRef: ChangeDetectorRef,
   ) {}
 
-  ngAfterViewInit() {
-    // Initialize the canvas or perform any additional setup if needed
+  ngOnInit() {
+    this.socketService.connect();
+    const currentRoom = this.roomApiService.getCurrentRoom();
+    if (currentRoom) {
+      this.handleJoinedRoom(currentRoom);
+      return;
+    }
+    console.log('home component init', this.socketService);
   }
 
-  createNode() {
-    let componentRef = this.canvas.createComponent(ResizeComponent);
-    console.log('homehome 1.5');
-    componentRef.instance.canvas = this.canvas.element.nativeElement;
-    const newResizeComponent = componentRef.instance;
-    const newElement: HTMLElement =
-      componentRef.location.nativeElement.querySelector('div');
-    console.log('newElement', newElement);
+  ngAfterViewInit() {}
 
-    componentRef.instance.requestAddNode.subscribe((temp: NodeResizeEvent) => {
-      // temp: is the old one
-      // new one from no where
-      const newE: NodeResizeEvent = this.addNodeButtonClick(temp); // Now element is guaranteed to be of type HTMLElement
-      console.log('after add', newE.htmlElement, newE.resizeComponent);
-
-      this.addLineForTwoNode(
-        temp.htmlElement,
-        newE.htmlElement,
-        newE.resizeComponent,
-        temp.resizeComponent,
-      ); // All arguments are now guaranteed to be defined
-    });
+  handleJoinedRoom(room: Room) {
+    console.log('joined room', room);
+    this.room = room;
+    this.showRooms = false;
+    this.roomApiService.enterRoom(room);
+    setTimeout(() => {
+      this.changeDetectorRef.detectChanges();
+    }, 0);
   }
 
-  // when we right click, we call requestAddNode.emit
-  // then this will be called
-  addNodeButtonClick(oldNode: NodeResizeEvent): NodeResizeEvent {
-    let componentRef = this.canvas.createComponent(ResizeComponent);
-    console.log('homehome 1.5');
-    componentRef.instance.canvas = this.canvas.element.nativeElement;
-    const newResizeComponent = componentRef.instance;
-    const newElement: HTMLElement =
-      componentRef.location.nativeElement.querySelector('div');
-    console.log('newElement', newElement);
-
-    componentRef.instance.requestAddNode.subscribe((temp: NodeResizeEvent) => {
-      // temp: is the old one
-      // new one from no where
-      const newE: NodeResizeEvent = this.addNodeButtonClick(temp); // Now element is guaranteed to be of type HTMLElement
-      console.log('after add', newE.htmlElement, newE.resizeComponent);
-
-      this.addLineForTwoNode(
-        temp.htmlElement,
-        newE.htmlElement,
-        newE.resizeComponent,
-        temp.resizeComponent,
-      ); // All arguments are now guaranteed to be defined
-    });
-    return { htmlElement: newElement, resizeComponent: newResizeComponent };
+  handleCreateRoom(createdRoom: Room) {
+    console.log('create room', createdRoom);
+    this.room = createdRoom;
+    this.showRooms = false; // is this showRooms to show the room list?
+    this.roomApiService.enterRoom(createdRoom);
   }
 
-  addLineForTwoNode(
-    startElement: HTMLElement,
-    endElement: HTMLElement,
-    startResizeComponent: ResizeComponent,
-    oneResizeComponent: ResizeComponent,
-  ) {
-    console.log(
-      'addLine ForTwoNode',
-      startElement,
-      endElement,
-      startResizeComponent,
-      oneResizeComponent,
-    );
-    // call from line component
-    let line = this.leaderLineService.createLine(startElement, endElement, {
-      color: 'black',
-      size: 2,
-    });
+  exitRoom() {
+    this.showRooms = true;
+    this.roomApiService.exitRoom();
+  }
 
-    // set the start and end socket
-    // line.setOptions({ startSocket: 'right', endSocket: 'left' });
-
-    // todo: set debounceTime
-    startResizeComponent.requestOnMoving.subscribe((element: HTMLElement) => {
-      // console.log('requestOnMoving 1', element);
-
-      line.position();
-      // Handle the moving of the node
-    });
-    oneResizeComponent.requestOnMoving.subscribe((element: HTMLElement) => {
-      // console.log('requestOnMoving 2', element);
-      line.position();
-      // Handle the moving of the node
-    });
-    // line.setOptions({startSocket: 'buttom', endSocket: 'buttom'});
+  ngOnDestroy() {
+    this.socketService.disconnect();
   }
 }

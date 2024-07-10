@@ -26,6 +26,12 @@ export class SignInComponent implements OnInit {
     this.title = environment.productName;
   }
 
+  images = [
+    { url: 'https://picsum.photos/1920/1080?random=1', alt: 'Image 1 Description' },
+    { url: 'https://picsum.photos/1920/1080?random=2', alt: 'Image 2 Description' },
+    // Add more images as needed
+  ];
+
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
       this.access_token = this.apiService.getAccessToken();

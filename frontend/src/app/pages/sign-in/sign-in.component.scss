@@ -1,19 +1,74 @@
 .container {
   display: flex;
-  flex-direction: column;
-  justify-content: center; /* Center vertically */
-  align-items: center; /* Center horizontally */
+ 
   height: 100vh; /* Full viewport height */
+  background-image: linear-gradient(to right, #6699ff, #ccffff);
+  background-image: url('../../../media/mind-mapping.jpg');
+  background-size: cover; /* Cover the entire page */
+  background-position: center;
+
+  .left-half, .right-half {
+    flex: 1; /* Each takes half of the container's width */
+    display: flex;
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+  }
+
+    /* Adding a pseudo-element for the semi-transparent overlay */
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.8); /* White with 50% opacity */
+      z-index: 0;
+    }
+  
+    /* Ensure content is layered above the pseudo-element */
+    > * {
+      position: relative;
+      z-index: 1;
+    }
 
   .header {
-    text-align: center; /* Center text horizontally */
+    text-align: left; /* Center text horizontally */
     margin-bottom: 20px; /* Example margin */
+    margin-left: 100px;
 
     h1 {
-      font-size: 24px; /* Adjust font size as needed */
+      font-size: 84px; /* Adjust font size as needed */
       margin: 0; /* Remove default margin */
       line-height: 1; /* Ensures vertical centering */
       vertical-align: middle; /* Vertical alignment for inline elements */
     }
+  }
+
+  
+
+  .images{
+    width: 1000px; /* Adjust width as needed */
+    height: 400px; /* Adjust height as needed */
+  }
+
+  .image-container{
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+  }
+
+  .login-card{
+    width: 600px;
+    height: 400px;
+    background-color: #f9f9f9;
+    border-radius: 20px;
+    padding: 10px;
+    height: auto;
+    margin-right: 10px;
+  }
+  .flex-container {
+    display: flex;
+    width: 100%;
   }
 }

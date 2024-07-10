@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { User } from '../classes/user';
 import { GetMeResponse } from '../classes/response';
+import { HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
@@ -23,7 +24,7 @@ export class ApiService {
    * @returns {Observable<{ url: string }>}
    */
   signIn(): Observable<{ url: string }> {
-    return this.http.get<{ url: string }>(`${this.oauth2Router}/signin`);
+    return this.http.post<{ url: string }>(`${this.oauth2Router}/signin`, {});
   }
 
   /**
@@ -68,10 +69,14 @@ export class ApiService {
     const removeToken = this.token;
     this.token = '';
     localStorage.removeItem('access_token');
-    return this.http.get(`${this.oauth2Router}/signout`, {
-      headers: {
-        Authorization: `Bearer ${removeToken}`,
+    return this.http.post(
+      `${this.oauth2Router}/signout`,
+      {},
+      {
+        headers: new HttpHeaders({
+          Authorization: `Bearer ${removeToken}`,
+        }),
       },
-    });
+    );
   }
 }

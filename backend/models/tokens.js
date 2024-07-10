@@ -22,7 +22,7 @@ export const Token = sequelize.define("Token", {
     allowNull: false,
   },
   id_token: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
     unique: true,
   },

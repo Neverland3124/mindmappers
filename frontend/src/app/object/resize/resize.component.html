@@ -1,34 +1,32 @@
 <div
+  id="{{ id }}"
   ngDraggable
   ngResizable
   [inBounds]="true"
   [bounds]="canvas"
   [rzAspectRatio]="true"
-  rzHandles="all"
+  rzHandles="s,e,se"
+  [position]="position"
   class="resizable-widget"
   (rzResizing)="emitResizeEvent($event)"
-  (dblclick)="doubleClick($event)"
   (contextmenu)="rightClick($event)"
-  (movingOffset)="emitMovingOffset($event)"
->
-  <!-- (click)="preventFocus($event)" -->
-  <!-- <button class="btn" (click)="addNodeButtonClick($event)">Add Node</button> -->
-  <!-- TODO: set the minimum and maximum size of the resize  -->
+  (movingOffset)="emitMovingOffset()"
+  (stopped)="onDragEnd($event)"
+  [rzMinWidth]="120"
+  [rzMinHeight]="60"
+  [rzMaxWidth]="480"
+  [rzMaxHeight]="240"
+  (dblclick)="onDoubleClick($event)"
+  >
+  <!-- [scale]="0.5" -->
   <textarea
+    #myTextArea
     class="input-text"
     placeholder="Input here......"
     rows="1"
     [style.fontSize.px]="fontSize"
     isEditing="false"
+    (keyup)="onKeyUp($event)"
+    
   ></textarea>
-  <!-- (contextmenu)="rightClickTextArea($event)" -->
-  <!-- (rightClick)="preventFocus($event)" -->
-
-  <!--     (click)="preventFocus($event)"
-    (dblclick)="doubleClick($event)"
-    (contextmenu)="rightClick($event)" -->
-
-  <!-- <button class="btn" (click)="deleteButtonClick($event)">Delete</button> -->
 </div>
-
-<!-- TODO: rightClickDoNothing -->

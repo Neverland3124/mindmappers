@@ -1,0 +1,99 @@
+name: Publish Express server to GHCR
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+      - develop-alpha-integrate
+      - develop-beta-integrate
+      - change-webhook-domain
+      - develop-final-integrate
+  push:
+    branches:
+      - main
+      - develop-alpha-integrate
+      - develop-beta-integrate
+      - change-webhook-domain
+      - develop-final-integrate
+    paths:
+      - backend/**
+env:
+  IMAGE_NAME: vertohealthjuniors-backend
+
+jobs:
+  # Push image to GitHub Packages.
+  # See also https://docs.docker.com/docker-hub/builds/
+  push:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          REDIRECT_URL: ${{ secrets.REDIRECT_URL }}
+          ORIGIN: ${{ secrets.ORIGIN }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+        run: |
+          docker build . --file Dockerfile \
+          --tag $(echo $IMAGE_NAME | tr '[:upper:]' '[:lower:]') \
+          --build-arg GOOGLE_CLIENT_ID \
+          --build-arg GOOGLE_CLIENT_SECRET \
+          --build-arg REDIRECT_URL \
+          --build-arg ORIGIN \
+          --build-arg DATABASE_NAME \
+          --build-arg DATABASE_USER \
+          --build-arg DATABASE_PASSWORD \
+          --build-arg DATABASE_HOST
+
+      - name: Log into GitHub Container Registry
+        # TODO: Create a Personal Access Tokens (PAT) with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
+        run: echo "${{ secrets.CR_PAT }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image to GitHub Container Registry
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "main" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+  deploy:
+    runs-on: ubuntu-latest
+    needs: push
+    steps:
+      - name: SSH and deploy with docker-compose
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            # Strip git ref prefix from version
+            VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+            # Strip "v" prefix from tag name
+            [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+            # Use Docker `latest` tag convention
+            [ "$VERSION" == "main" ] && VERSION=latest
+            echo "Deploying version $VERSION"
+            sudo docker-compose down
+            sudo VERSION=$VERSION docker-compose pull
+            sudo VERSION=$VERSION DATABASE_NAME=${{ secrets.DATABASE_NAME }} DATABASE_USER=${{ secrets.DATABASE_USER }} DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} docker-compose up -d

@@ -1,7 +1,21 @@
 <div class="container">
-  <header class="header">
-    <h1>Welcome to {{ title }}</h1>
-  </header>
-
-  <app-sign-in-btn (click)="signIn()"></app-sign-in-btn>
+  <div class="left-half">
+    <header class="header">
+      <h1>Welcome to {{ title }}</h1>
+    </header>
+    <!-- You can uncomment and use the carousel here if needed -->
+    <!-- <nz-carousel nzEffect="fade">
+      <div nz-carousel-content *ngFor="let image of images" class="image-container">
+        <img class="images" src="{{ image.url }}" alt="{{ image.alt }}">
+      </div>
+    </nz-carousel> -->
+  </div>
+  <div class="right-half">
+    <nz-card class="login-card" nzTitle="Sign in using google">
+      <!-- <p>Some info</p>
+      <p>Some info</p> -->
+      <!-- TODO: mock other login options-->
+      <app-sign-in-btn (click)="signIn()"></app-sign-in-btn>
+    </nz-card>
+  </div>
 </div>

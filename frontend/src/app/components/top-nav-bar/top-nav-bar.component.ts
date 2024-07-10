@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { User } from '../../classes/user';
 import { ApiService } from '../../services/api.service';
+import { RoomApiService } from '../../services/room-api.service';
 
 @Component({
   selector: 'app-top-nav-bar',
@@ -16,16 +17,22 @@ export class TopNavBarComponent {
   };
   @Output() signInPage = new EventEmitter<boolean>();
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private roomApiService: RoomApiService) {}
 
   logout() {
-    this.apiService.signOut().subscribe((message) => {
-      if (!message) {
-        alert('Sign out failed');
+    this.apiService.signOut().subscribe({
+      next: (_) => {
+        document.querySelectorAll('.leader-line').forEach((e) => e.remove());
+        this.roomApiService.exitRoom();
+        this.signInPage.emit(true);
         return;
-      }
-
-      this.signInPage.emit(true);
+      },
+      error: (_) => {
+        alert('Sign out failed');
+        document.querySelectorAll('.leader-line').forEach((e) => e.remove());
+        this.roomApiService.exitRoom();
+        this.signInPage.emit(true);
+      },
     });
   }
 }

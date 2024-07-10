@@ -1,3 +1,10 @@
-<div class="canvas-boundary" #canvas>
-  <ng-content></ng-content>
+<div class="canvas" #canvas>
+  <div class="canvas-header">
+    <button nz-button (click)="sendAddNodeRequest()">Add Node</button>
+    <h3 class="room-name">{{ roomName }}</h3>
+    <app-invite-modal [roomName]="roomName"></app-invite-modal>
+    <button nz-button class="exit-room-btn" (click)="emitExitRoom()">
+      Exit Room
+    </button>
+  </div>
 </div>
