@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { User } from '../../classes/user';
 import { RoomApiService } from '../../services/room-api.service';
 import { Room } from '../../classes/room';
@@ -13,8 +13,10 @@ import { ChangeDetectorRef } from '@angular/core';
 })
 export class HomeComponent {
   @Input() user: User = {
+    id: -1,
     email: '',
-    picture: '',
+    avatar: '',
+    name: '',
   };
 
   showRooms: boolean = true;
@@ -23,6 +25,8 @@ export class HomeComponent {
     name: '',
     description: '',
     owner: -1,
+    ownerName: '',
+    ownerAvatar: '',
   };
 
   public socketService: SocketService = new SocketService();
@@ -35,17 +39,14 @@ export class HomeComponent {
   ngOnInit() {
     this.socketService.connect();
     const currentRoom = this.roomApiService.getCurrentRoom();
+    // Note: This will use the room stored in the session storage to join the room
     if (currentRoom) {
       this.handleJoinedRoom(currentRoom);
       return;
     }
-    console.log('home component init', this.socketService);
   }
 
-  ngAfterViewInit() {}
-
   handleJoinedRoom(room: Room) {
-    console.log('joined room', room);
     this.room = room;
     this.showRooms = false;
     this.roomApiService.enterRoom(room);
@@ -55,7 +56,6 @@ export class HomeComponent {
   }
 
   handleCreateRoom(createdRoom: Room) {
-    console.log('create room', createdRoom);
     this.room = createdRoom;
     this.showRooms = false; // is this showRooms to show the room list?
     this.roomApiService.enterRoom(createdRoom);

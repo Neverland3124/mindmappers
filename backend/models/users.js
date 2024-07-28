@@ -7,8 +7,13 @@ export const User = sequelize.define("User", {
     allowNull: false,
     unique: true,
   },
-  picture: {
+  avatar: {
     type: DataTypes.STRING,
     allowNull: false,
-  }, // TODO: show the picture
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: "Anonymous",
+  },
 });

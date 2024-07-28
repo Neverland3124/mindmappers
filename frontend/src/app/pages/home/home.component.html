@@ -1,16 +1,15 @@
 <app-room
   *ngIf="showRooms"
   (joinedRoom)="handleJoinedRoom($event)"
-  (createdRoom)="handleCreateRoom($event)"
   [socketService]="socketService"
   [user]="user"
 ></app-room>
-<app-canvas
+<app-gocanvas
   *ngIf="!showRooms"
-  [roomId]="room.id"
-  [roomName]="room.name"
+  [room]="room"
   (exitRoom)="exitRoom()"
   [socketService]="socketService"
   [user]="user"
+  [roomDescription]="room.description"
 >
-</app-canvas>
+</app-gocanvas>

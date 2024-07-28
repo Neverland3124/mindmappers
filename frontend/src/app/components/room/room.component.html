@@ -1,104 +1,97 @@
-<div [hidden]="!showPublicRooms" class="Map">
+<div class="Map" *ngIf="dataReady">
   <div class="flex">
-    <h2>Public Rooms</h2>
-    <button nz-button nzType="primary" (click)="createRoom()">
-      Create Room
-    </button>
+    <h2>All Rooms</h2>
+    <app-create-room-modal></app-create-room-modal>
   </div>
   <nz-empty *ngIf="rooms.length === 0" [nzNotFoundContent]="contentTpl" />
+
   <div class="all-cards">
-    <nz-card class="room-card" *ngFor="let room of rooms" nzBordered style="width:300px;" [nzTitle]="'room name: ' + room.name">
-      <nz-card-meta [nzTitle]="'Description: ' +room.description"></nz-card-meta>
-      <button
-        nz-button
-        nzType="primary"
+    <!-- class="room-card" -->
+    <nz-card
+      *ngFor="let room of rooms"
+      style="width: 300px; margin-top: 16px"
+      [nzActions]="[actionDelete, actionEdit, actionSetting]"
+      [nzLoading]="false"
+    >
+      <nz-skeleton
+        [nzActive]="true"
+        [nzLoading]="false"
         (click)="joinRoom(room)"
-        class="room-btn"
+        style="cursor: pointer"
+        nz-tooltip
+        nzTooltipPlacement="bottom"
+        [nzTooltipTitle]="'Join Room: ' + room.name"
       >
-        Join
-      </button>
-      <app-invite-modal
-        [roomName]="room.name"
-        class="room-btn"
-      ></app-invite-modal>
-      <button
-        nz-button
-        nzType="default"
-        nzDanger
-        (click)="deleteRoom(room)"
-        class="room-btn"
-      >
-        Delete
-      </button>
+        <nz-card-meta
+          [nzAvatar]="imageTemplate"
+          [nzTitle]="titleTemplate"
+          [nzDescription]="contentTemplate"
+        ></nz-card-meta>
+      </nz-skeleton>
+      <ng-template #titleTemplate>
+        <div class="wrap-text height-30 overflow-hidden">
+          <h3>{{ room.name }}</h3>
+        </div>
+      </ng-template>
+      <ng-template #contentTemplate>
+        <div class="wrap-text height-48 overflow-hidden">
+          <span>{{ room.description }}</span>
+        </div>
+      </ng-template>
+      <ng-template #imageTemplate>
+        <img
+          [src]="room.ownerAvatar"
+          style="width: 56px; height: 56px; border-radius: 50%"
+          nz-tooltip
+          nzTooltipPlacement="bottom"
+          [nzTooltipTitle]="'Owner: ' + room.ownerName"
+        />
+      </ng-template>
+      <ng-template #actionSetting>
+        <span
+          nz-icon
+          nzType="fund"
+          nzTheme="fill"
+          nz-tooltip
+          nzTooltipPlacement="bottom"
+          nzTooltipTitle="Join Room"
+          (click)="joinRoom(room)"
+        ></span>
+      </ng-template>
+      <ng-template #actionEdit>
+        <span
+          nz-icon
+          nzType="edit"
+          nzTheme="fill"
+          nz-tooltip
+          nzTooltipPlacement="bottom"
+          [nzTooltipTitle]="
+            room.owner === user.id ? 'Edit Room' : 'You are not the owner'
+          "
+          (click)="editRoom(room)"
+          [class.disabled]="room.owner !== user.id"
+          [attr.disabled]="room.owner !== user.id ? true : null"
+        ></span>
+      </ng-template>
+      <ng-template #actionDelete>
+        <span
+          nz-icon
+          nzType="delete"
+          nzTheme="fill"
+          nz-tooltip
+          nzTooltipPlacement="bottom"
+          [nzTooltipTitle]="
+            room.owner === user.id ? 'Delete Room' : 'You are not the owner'
+          "
+          (click)="deleteRoom(room)"
+          [class.disabled]="room.owner !== user.id"
+          [attr.disabled]="room.owner !== user.id ? true : null"
+        ></span>
+      </ng-template>
     </nz-card>
   </div>
 </div>
 
-<div class="create-room-container" [hidden]="showPublicRooms">
-  <h3 class="margin-top-20">Create Room</h3>
-  <form nz-form #roomForm="ngForm" (ngSubmit)="onSubmit(roomForm)" class="create-room-form">
-    <nz-form-item>
-      <nz-form-label [nzFor]="'roomName'">Room Name</nz-form-label>
-      <nz-form-control>
-        <input
-          nz-input
-          type="text"
-          id="roomName"
-          name="roomName"
-          ngModel
-          required
-        />
-      </nz-form-control>
-    </nz-form-item>
-    <nz-form-item>
-      <nz-form-label [nzFor]="'roomDescription'"
-        >Description</nz-form-label
-      >
-      <nz-form-control>
-        <textarea
-          nz-input
-          type="text"
-          id="roomDescription"
-          name="roomDescription"
-          ngModel
-          required
-        >
-        </textarea>
-      </nz-form-control>
-    </nz-form-item>
-    <!-- <nz-form-item>
-
-        <nz-form-label>Visibility</nz-form-label>
-        <nz-form-control>
-          <nz-radio-group name="isPublic" ngModel required>
-            <label nz-radio nzValue="true">Public</label>
-            <label nz-radio nzValue="false">Private</label>
-          </nz-radio-group>
-        </nz-form-control>
-      </nz-form-item> -->
-    <div class="form-actions">
-      <button
-        nz-button
-        nzType="default"
-        (click)="back()"
-        class="margin-lr-15"
-        type="button"
-      >
-        Back
-      </button>
-      <button
-        nz-button
-        nzType="primary"
-        type="button"
-        (click)="clear()"
-        class="margin-lr-15"
-      >
-        Clear
-      </button>
-      <button nz-button nzType="primary" type="submit" class="margin-lr-15">
-        Enter
-      </button>
-    </div>
-  </form>
-
+<div class="loading-container" *ngIf="!dataReady">
+  <nz-spin [nzSize]="'large'"></nz-spin>
 </div>

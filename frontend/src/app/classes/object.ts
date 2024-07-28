@@ -1,8 +1,8 @@
 export interface Object {
-  id: number;
+  key: number;
   text: string;
-  x: number;
-  y: number;
-  size: number;
+  loc: string;
   parent: number;
+  dir: string;
+  font: string;
 }

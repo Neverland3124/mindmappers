@@ -1,0 +1,50 @@
+<div class="right-side-button-group">
+  <button nz-button nzType="default" (click)="showModal()">
+    <span nz-icon nzType="picture" nzTheme="outline"></span>
+    Show Image
+  </button>
+</div>
+
+<nz-modal
+  nzDraggable
+  nzCentered
+  [(nzVisible)]="isVisible"
+  nzTitle="View Generated Image"
+  (nzOnCancel)="handleCancel()"
+  [nzFooter]="null"
+>
+  <ng-container *nzModalContent>
+    <div *ngIf="imageState === 0">
+      <span
+        nz-icon
+        nzType="loading"
+        style="font-size: 250px; color: #08c"
+        nzTheme="outline"
+      ></span>
+      <div style="margin-top: 10px">{{ imageText }}</div>
+    </div>
+    <div *ngIf="imageState === 1">
+      <span
+        nz-icon
+        nzType="file-excel"
+        style="font-size: 250px; color: #08c"
+        nzTheme="outline"
+      ></span>
+      <div style="margin-top: 10px">{{ imageText }}</div>
+    </div>
+    <div *ngIf="imageState === 2">
+      <span
+        nz-icon
+        nzType="sync"
+        [nzSpin]="true"
+        style="font-size: 250px; color: #08c"
+        nzTheme="outline"
+      ></span>
+      <div style="margin-top: 10px">{{ imageText }}</div>
+    </div>
+
+    <div *ngIf="imageState === 3">
+      <img [src]="imageUrl" style="width: 100%; height: auto" />
+    </div>
+  </ng-container>
+</nz-modal>

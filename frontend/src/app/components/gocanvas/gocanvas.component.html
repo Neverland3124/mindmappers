@@ -1,0 +1,301 @@
+<nz-layout class="canvas-container">
+  <nz-sider
+    nzCollapsible
+    nzWidth="200px"
+    nzTheme="light"
+    [nzCollapsed]="isCollapsed"
+    (nzCollapsedChange)="onCollapseChange()"
+    class="overflow-hidden"
+  >
+    <ul nz-menu nzMode="inline" nzTheme="light">
+      <li
+        nz-menu-item
+        (click)="onAddNode($event)"
+        nz-tooltip
+        nzTooltipPlacement="right"
+        nzTooltipTitle="Add a new node"
+      >
+        <span nz-icon nzType="plus" nzTheme="outline"></span>
+        <span>Add</span>
+      </li>
+      <li
+        nz-menu-item
+        (click)="onCopyNodes($event)"
+        [class.disabled]="menuState.haveNodeSelected"
+        nz-tooltip
+        nzTooltipPlacement="right"
+        nzTooltipTitle="Copy selected nodes"
+      >
+        <span nz-icon nzType="copy" nzTheme="outline"></span>
+        <span>Copy</span>
+      </li>
+      <li
+        nz-menu-item
+        (click)="onCutNodes($event)"
+        [class.disabled]="menuState.haveNodeSelected"
+        nz-tooltip
+        nzTooltipPlacement="right"
+        nzTooltipTitle="Cut selected nodes"
+      >
+        <span nz-icon nzType="scissor" nzTheme="outline"></span>
+        <span>Cut</span>
+      </li>
+      <li
+        nz-menu-item
+        (click)="onPasteNodes($event)"
+        [class.disabled]="menuState.pasteAction"
+        nz-tooltip
+        nzTooltipPlacement="right"
+        nzTooltipTitle="Paste copied nodes"
+      >
+        <span nz-icon nzType="snippets" nzTheme="outline"></span>
+        <span>Paste</span>
+      </li>
+      <li
+        nz-menu-item
+        (click)="onDeleteNodes($event)"
+        [class.disabled]="menuState.haveNodeSelected"
+        nz-tooltip
+        nzTooltipPlacement="right"
+        nzTooltipTitle="Delete selected nodes"
+      >
+        <span nz-icon nzType="delete" nzTheme="outline"></span>
+        <span>Delete</span>
+      </li>
+      <li
+        nz-menu-item
+        (click)="onToggleTextBold($event)"
+        [class.disabled]="menuState.haveNodeSelected"
+        nz-tooltip
+        nzTooltipPlacement="right"
+        nzTooltipTitle="Toggle text bold"
+      >
+        <span nz-icon nzType="bold" nzTheme="outline"></span>
+        <span>Bold</span>
+      </li>
+      <li
+        nz-menu-item
+        (click)="onUndoAction($event)"
+        [class.disabled]="menuState.undoAction"
+        nz-tooltip
+        nzTooltipPlacement="right"
+        nzTooltipTitle="Undo last action"
+      >
+        <span nz-icon nzType="undo" nzTheme="outline"></span>
+        <span>Undo</span>
+      </li>
+      <li
+        nz-menu-item
+        (click)="onRedoAction($event)"
+        [class.disabled]="menuState.redoAction"
+        nz-tooltip
+        nzTooltipPlacement="right"
+        nzTooltipTitle="Redo last action"
+      >
+        <span nz-icon nzType="redo" nzTheme="outline"></span>
+        <span>Redo</span>
+      </li>
+      <li
+        nz-menu-item
+        (click)="onClearBoard($event)"
+        [class.disabled]="menuState.alwaysFalse"
+        nz-tooltip
+        nzTooltipPlacement="right"
+        nzTooltipTitle="Clear the board"
+      >
+        <span nz-icon nzType="clear" nzTheme="outline"></span>
+        <span>Clear Map</span>
+      </li>
+      <li
+        nz-menu-item
+        (click)="onLayoutBoard($event)"
+        [class.disabled]="menuState.alwaysFalse"
+        nz-tooltip
+        nzTooltipPlacement="right"
+        nzTooltipTitle="Layout the board"
+      >
+        <span nz-icon nzType="layout" nzTheme="outline"></span>
+        <span>Layout Map</span>
+      </li>
+      <li
+        nz-menu-item
+        (click)="onToggleScrollMode($event)"
+        [class.disabled]="menuState.alwaysFalse"
+        nz-tooltip
+        nzTooltipPlacement="right"
+        nzTooltipTitle="Switch Scroll Mode"
+      >
+        <span nz-icon nzType="retweet" nzTheme="outline"></span>
+        <span>Scroll Mode</span>
+      </li>
+      <li
+        nz-menu-item
+        (click)="onCenterNode($event)"
+        [class.disabled]="menuState.haveNodeSelected"
+        nz-tooltip
+        nzTooltipPlacement="right"
+        nzTooltipTitle="Expand and Center"
+      >
+        <span nz-icon nzType="arrows-alt" nzTheme="outline"></span>
+        <span>Expand & Center</span>
+      </li>
+      <li
+        nz-menu-item
+        (click)="onZoomToFit($event)"
+        [class.disabled]="menuState.alwaysFalse"
+        nz-tooltip
+        nzTooltipPlacement="right"
+        nzTooltipTitle="Zoom the board"
+      >
+        <span nz-icon nzType="shrink" nzTheme="outline"></span>
+        <span>Zoom to fit</span>
+      </li>
+    </ul>
+  </nz-sider>
+
+  <nz-layout class="canvas-middle-right">
+    <div class="canvas-middle-side">
+      <gojs-overview
+        #myOverview
+        [initOverview]="initOverview"
+        [divClassName]="overviewDivClassName"
+        [observedDiagram]="observedDiagram"
+      ></gojs-overview>
+      <!-- Diagram and Overview -->
+      <gojs-diagram
+        #myDiagram
+        [initDiagram]="initDiagram"
+        [nodeDataArray]="state.diagramNodeData"
+        [modelData]="state.diagramModelData"
+        [skipsDiagramUpdate]="state.skipsDiagramUpdate"
+        (modelChange)="diagramModelChange($event)"
+        [divClassName]="diagramDivClassName"
+      >
+      </gojs-diagram>
+    </div>
+    <div class="canvas-right-side overflow-hidden">
+      <div class="right-side-card-flex">
+        <div class="right-side-button-group">
+          <button
+            nz-button
+            nzType="default"
+            nzDanger
+            (click)="emitExitRoom()"
+            nz-tooltip
+            nzTooltipPlacement="left"
+            nzTooltipTitle="Exit Room"
+          >
+            <span nz-icon nzType="logout" nzTheme="outline"></span>
+            Exit Room
+          </button>
+          <button
+            nz-button
+            nzType="dashed"
+            (click)="emitInstruction()"
+            nz-tooltip
+            nzTooltipPlacement="left"
+            nzTooltipTitle="Instruction"
+          >
+            <span nz-icon nzType="setting" nzTheme="outline"></span>
+            Instruction
+          </button>
+          <app-invite-modal
+            [roomName]="room.name"
+            [roomId]="room.id"
+            nz-tooltip
+            nzTooltipPlacement="left"
+            nzTooltipTitle="Image a Friend to Join"
+          ></app-invite-modal>
+        </div>
+        <nz-divider></nz-divider>
+        <div
+          class="wrap-text height-limit-45 overflow-hidden"
+          nz-tooltip
+          nzTooltipPlacement="left"
+          [nzTooltipTitle]="room.name"
+        >
+          <span class="bold-text">Room Name:</span>
+          {{ room.name }}
+        </div>
+        <nz-divider></nz-divider>
+        <div
+          class="wrap-text height-limit-45 overflow-hidden"
+          nz-tooltip
+          nzTooltipPlacement="left"
+          [nzTooltipTitle]="user.name"
+        >
+          <span class="bold-text">Room Owner:</span> {{ room.ownerName }}
+        </div>
+        <nz-divider></nz-divider>
+        <div
+          class="wrap-text height-limit-64 overflow-hidden"
+          nz-tooltip
+          nzTooltipPlacement="left"
+          [nzTooltipTitle]="room.description"
+        >
+          <span class="bold-text">Description:</span> {{ room.description }}
+        </div>
+        <nz-divider></nz-divider>
+        <div class="right-side-button-group">
+          <button
+            nz-button
+            nzType="default"
+            (click)="onGenerateImage()"
+            nz-tooltip
+            nzTooltipPlacement="left"
+            nzTooltipTitle="Generate AI Image"
+          >
+            <span nz-icon nzType="camera" nzTheme="outline"></span>
+            Generate Image
+          </button>
+          <app-image-modal
+            [roomId]="room.id"
+            [socketService]="socketService"
+            nz-tooltip
+            nzTooltipPlacement="left"
+            nzTooltipTitle="View Generated Image"
+          ></app-image-modal>
+          <button
+            nz-button
+            nzType="default"
+            (click)="onImport()"
+            nz-tooltip
+            nzTooltipPlacement="left"
+            nzTooltipTitle="Import from JSON File"
+          >
+            <span nz-icon nzType="import" nzTheme="outline"></span>
+            <span>Import JSON</span>
+            <input
+              type="file"
+              #fileInput
+              (change)="onFileSelected($event)"
+              class="hidden"
+              accept=".json"
+            />
+          </button>
+
+          <button
+            nz-button
+            nzType="default"
+            (click)="onExport()"
+            nz-tooltip
+            nzTooltipPlacement="left"
+            nzTooltipTitle="Export to JSON File"
+          >
+            <span nz-icon nzType="export" nzTheme="outline"></span>
+            <span>Export JSON</span>
+          </button>
+          <nz-divider></nz-divider>
+        </div>
+      </div>
+      <img
+        src="assets/logo-full-transparent.png"
+        class="logo-full"
+        nz-tooltip
+        nzTooltipPlacement="left"
+        nzTooltipTitle="🤔"
+        (click)="onLogoClick()"
+      />
+    </div>
+  </nz-layout>
+</nz-layout>

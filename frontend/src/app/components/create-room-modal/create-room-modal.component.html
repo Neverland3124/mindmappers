@@ -1,0 +1,51 @@
+<button nz-button nzType="primary" (click)="showModal()">
+  <span>Create Room</span>
+</button>
+<nz-modal
+  [(nzVisible)]="isVisible"
+  [nzTitle]="modalTitle"
+  [nzContent]="modalContent"
+  [nzFooter]="modalFooter"
+  (nzOnCancel)="handleCancel()"
+>
+  <ng-template #modalTitle>Create A New Room</ng-template>
+
+  <ng-template #modalContent>
+    <p class="error-box" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <form>
+      <div class="form-group">
+        <label for="name">Room Name:</label>
+        <input
+          type="text"
+          id="name"
+          [(ngModel)]="roomName"
+          name="name"
+          class="form-input"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea
+          id="description"
+          [(ngModel)]="roomDescription"
+          name="description"
+          class="form-input"
+          required
+        ></textarea>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #modalFooter>
+    <button nz-button nzType="default" (click)="handleCancel()">Cancel</button>
+    <button
+      nz-button
+      nzType="primary"
+      (click)="handleCreate()"
+      [nzLoading]="isConfirmLoading"
+    >
+      Create Room
+    </button>
+  </ng-template>
+</nz-modal>

@@ -3,19 +3,17 @@ import { io, Socket } from 'socket.io-client';
 import { environment } from '../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SocketService {
   private url = environment.apiEndpoint;
   private socket: any;
-  constructor() {
-
-  }
+  constructor() {}
 
   connect() {
     this.socket = io(this.url, {
       transports: ['websocket'],
-    });  
+    });
   }
 
   listen(eventName: string, callback: (data: any) => void) {
@@ -30,6 +28,10 @@ export class SocketService {
     if (this.socket) {
       this.socket.disconnect();
     }
+  }
+
+  removeListener(eventName: string) {
+    this.socket.off(eventName);
   }
 
   removeAllListeners() {

@@ -7,22 +7,29 @@
   "scripts": {
     "format": "npx prettier --write .",
     "start:dev": "nodemon app.js",
+    "start:worker": "nodemon worker.js",
     "clean": "rm -rf uploads/ && rm mindmappers.sqlite",
-    "start": "node app.js"
+    "start": "concurrently \"nodemon app.js\" \"nodemon worker.js\""
   },
   "devDependencies": {
     "nodemon": "^3.1.4",
     "prettier": "^3.3.2"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.617.0",
+    "@aws-sdk/s3-request-presigner": "^3.617.0",
+    "async-mutex": "^0.5.0",
+    "axios": "^1.7.2",
     "body-parser": "^1.20.2",
+    "bullmq": "^5.10.3",
+    "concurrently": "^8.2.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "googleapis": "^140.0.0",
     "http": "^0.0.1-security",
     "mailersend": "^2.2.0",
-    "multer": "^1.4.5-lts.1",
+    "openai": "^4.53.0",
     "pg": "^8.12.0",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.3",

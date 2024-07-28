@@ -7,14 +7,12 @@ on:
       - main
       - develop-alpha-integrate
       - develop-beta-integrate
-      - change-webhook-domain
       - develop-final-integrate
   push:
     branches:
       - main
       - develop-alpha-integrate
       - develop-beta-integrate
-      - change-webhook-domain
       - develop-final-integrate
     paths:
       - backend/**
@@ -44,6 +42,14 @@ jobs:
           DATABASE_USER: ${{ secrets.DATABASE_USER }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
           DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          MAILERSEND_API_KEY: ${{ secrets.MAILERSEND_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
         run: |
           docker build . --file Dockerfile \
           --tag $(echo $IMAGE_NAME | tr '[:upper:]' '[:lower:]') \
@@ -54,10 +60,17 @@ jobs:
           --build-arg DATABASE_NAME \
           --build-arg DATABASE_USER \
           --build-arg DATABASE_PASSWORD \
-          --build-arg DATABASE_HOST
+          --build-arg DATABASE_HOST \
+          --build-arg MAILERSEND_API_KEY \
+          --build-arg OPENAI_API_KEY \
+          --build-arg AWS_ACCESS_KEY_ID \
+          --build-arg AWS_SECRET_ACCESS_KEY \
+          --build-arg AWS_REGION \
+          --build-arg AWS_BUCKET_NAME \
+          --build-arg REDIS_HOST \
+          --build-arg REDIS_PORT
 
       - name: Log into GitHub Container Registry
-        # TODO: Create a Personal Access Tokens (PAT) with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
         run: echo "${{ secrets.CR_PAT }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push image to GitHub Container Registry

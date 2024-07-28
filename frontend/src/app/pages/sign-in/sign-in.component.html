@@ -1,21 +1,28 @@
-<div class="container">
-  <div class="left-half">
-    <header class="header">
-      <h1>Welcome to {{ title }}</h1>
-    </header>
-    <!-- You can uncomment and use the carousel here if needed -->
-    <!-- <nz-carousel nzEffect="fade">
-      <div nz-carousel-content *ngFor="let image of images" class="image-container">
-        <img class="images" src="{{ image.url }}" alt="{{ image.alt }}">
-      </div>
-    </nz-carousel> -->
+<div class="container" *ngIf="!isLoading">
+  <div class="header">
+    <div class="logo" (click)="reloadPage()">
+      <img src="/assets/logo-transparent.png" alt="Logo" class="logo-image" />
+      <img src="/assets/MindMappers.png" alt="MindMappers" class="logo-text" />
+    </div>
+    <div class="nav-buttons">
+      <button nzButton class="nav-button" (click)="showAbout()">
+        <span nz-icon nzType="coffee" nzTheme="outline"></span>
+        <span class="margin-left-5px nav-text">About</span>
+      </button>
+      <button class="nav-button" (click)="freeTrial()">
+        <span nz-icon nzType="user" nzTheme="outline"></span>
+        <span class="margin-left-5px nav-text">Free Trial</span>
+      </button>
+      <button class="nav-button" (click)="signIn()">
+        <span nz-icon nzType="google" nzTheme="outline"></span>
+        <span class="margin-left-5px nav-text">Sign in with Google</span>
+      </button>
+    </div>
   </div>
-  <div class="right-half">
-    <nz-card class="login-card" nzTitle="Sign in using google">
-      <!-- <p>Some info</p>
-      <p>Some info</p> -->
-      <!-- TODO: mock other login options-->
-      <app-sign-in-btn (click)="signIn()"></app-sign-in-btn>
-    </nz-card>
+  <div class="hero-section">
+    <app-floating-div></app-floating-div>
   </div>
+</div>
+<div class="loading-container" *ngIf="isLoading">
+  <nz-spin [nzSize]="'large'"></nz-spin>
 </div>

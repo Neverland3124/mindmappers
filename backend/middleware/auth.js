@@ -6,7 +6,7 @@ export const isAuthenticated = async function (req, res, next) {
   if (!tokenHeader) {
     return res.status(401).json({ error: "Authorization token is required." });
   }
-  const token = tokenHeader.split(" ")[1]; // Assuming 'Bearer <token>'
+  const token = tokenHeader.split(" ")[1];
 
   // Check if the token is not provided
   if (!token) {
@@ -14,16 +14,16 @@ export const isAuthenticated = async function (req, res, next) {
   }
 
   try {
-    // TODO: we don't allow refresh tokens for is authenticated?
+    // verify, don't refresh token, leave the refresh endpoint to handle that
     const userId = await verifyToken(token);
     if (!userId) {
-      // Token is invalid or expired
       return res.status(401).json({ error: "Token is invalid or expired." });
     }
 
     const user = await User.findOne({ where: { id: userId } });
     req.userId = user.id;
     req.userEmail = user.email;
+    req.name = user.name;
     next();
   } catch (error) {
     return res

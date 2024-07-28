@@ -12,8 +12,10 @@ export class AppComponent {
   homePage: boolean = false;
   topNavBar: boolean = false;
   user = {
+    id: -1,
     email: '',
-    picture: '',
+    avatar: '',
+    name: '',
   };
 
   constructor() {}
@@ -30,7 +32,7 @@ export class AppComponent {
     this.signInPage = !show;
   }
 
-  setUser(obj: { email: string; picture: string }) {
+  setUser(obj: { email: string; avatar: string; id: number; name: string }) {
     this.user = obj;
   }
 }

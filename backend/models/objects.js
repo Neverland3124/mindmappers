@@ -7,23 +7,35 @@ export const Object = sequelize.define("Object", {
     type: DataTypes.TEXT,
     allowNull: true,
   },
-  x: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  y: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  size: {
-    type: DataTypes.FLOAT,
+  loc: {
+    type: DataTypes.STRING,
     allowNull: false,
   },
   parent: {
     type: DataTypes.INTEGER, // object id of its parent
     allowNull: true,
   },
+  key: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  dir: {
+    // direction
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: "right",
+  },
+  url: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
+  },
+  font: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: "16px sans-serif",
+  },
 });
 
 Room.hasMany(Object, { onDelete: "CASCADE" });
-Object.belongsTo(Room); // One time is enough
+Object.belongsTo(Room);

@@ -1,12 +1,13 @@
 import { Router } from "express";
 import { Object } from "../models/objects.js";
 import { io } from "../app.js";
+import { isAuthenticated } from "../middleware/auth.js";
 
 export const objectRouter = Router();
 
-objectRouter.get("/", async (req, res, next) => {
+// get all objects for a room
+objectRouter.get("/", isAuthenticated, async (req, res, next) => {
   try {
-    // input parameters: roomid
     const { roomId } = req.query;
     if (!roomId) {
       return res.status(400).json({ error: "roomId is required" });
@@ -19,87 +20,128 @@ objectRouter.get("/", async (req, res, next) => {
 
     const count = objects.length;
 
-    return res.status(200).json({ objects: objects, count: count });
+    return res.status(200).json({ count: count, objects });
   } catch (error) {
     return res.status(500).send({ error: error });
   }
 });
 
-objectRouter.post("/", async (req, res, next) => {
-  try {
-    const { text, x, y, size, parent, roomId } = req.body;
-    if (
-      x === undefined ||
-      x === null ||
-      y === undefined ||
-      y === null ||
-      size === undefined ||
-      size === null ||
-      !roomId
-    ) {
-      return res.status(400).json({
-        error: "x, y, size, and roomId are required for creating an object",
-      });
-    }
+objectRouter.post("/", isAuthenticated, async (req, res, next) => {
+  const { nodes, roomId } = req.body;
+  const transaction = await Object.sequelize.transaction();
 
-    const object = await Object.create({
-      text: text,
-      x: x,
-      y: y,
-      size: size,
-      parent: parent,
-      RoomId: roomId,
+  try {
+    let values = "";
+    let params = [];
+
+    nodes.forEach((node, index) => {
+      const { key, text, loc, dir, parent, font } = node;
+
+      if (index > 0) values += ", ";
+      values += `(?, ?, ?, ?, ?, ?, ?, ${"CURRENT_TIMESTAMP"},${"CURRENT_TIMESTAMP"})`;
+      params.push(key, roomId, text, loc, dir, parent, font);
     });
-    io.emit(`object-${roomId}-create`, object);
-    return res.status(201).json(object);
+
+    const sql = `
+      INSERT INTO "Objects" ("key", "RoomId", "text", "loc", "dir", "parent", "font", "createdAt", "updatedAt")
+      VALUES ${values};
+    `;
+
+    await Object.sequelize.query(sql, {
+      replacements: params,
+      transaction,
+    });
+
+    await transaction.commit();
+
+    io.emit(`object-${roomId}-create`, { nodes, userId: req.userId });
+    return res.status(201).json({ nodes });
   } catch (error) {
-    return res.status(500).send({ error: error });
+    await transaction.rollback();
+    return res.status(500).send({ error: `Error when create nodes: ${error}` });
   }
 });
 
-objectRouter.patch("/", async (req, res, next) => {
+objectRouter.patch("/", isAuthenticated, async (req, res, next) => {
+  const { nodes, roomId } = req.body;
+  const transaction = await Object.sequelize.transaction();
+
   try {
-    const { objectId } = req.query;
-    // don't allow to change the room
-    const { text, x, y, size, parent } = req.body;
+    let values = "";
+    let params = [];
 
-    const object = await Object.findByPk(objectId);
-    if (!object) {
-      return res.status(404).json({ error: "Object not found" });
-    }
+    nodes.forEach((node, index) => {
+      const { key, text, loc, dir, parent, font } = node;
 
-    if (text !== null && text !== undefined) object.text = text;
-    if (x) object.x = x;
-    if (y) object.y = y;
-    if (size) object.size = size;
-    if (parent) object.parent = parent;
+      if (index > 0) values += ", ";
+      values += `(${key}, ?, ?, ?, ?, ?, ?)`;
+      params.push(roomId, text, loc, dir, parent, font);
+    });
 
-    await object.save();
-    io.emit(`object-${object.RoomId}-update`, object);
-    return res.status(200).json({ id: object.id });
+    const sql = `
+      UPDATE "Objects"
+      SET
+        text = vals.text,
+        loc = vals.loc,
+        dir = vals.dir,
+        parent = vals.parent,
+        "font" = vals."font"
+      FROM (VALUES
+        ${values}
+      ) AS vals("key", "RoomId", "text", "loc", "dir", "parent", "font")
+      WHERE "Objects"."key" = vals."key" AND "Objects"."RoomId" = vals."RoomId";
+    `;
+
+    await Object.sequelize.query(sql, {
+      replacements: params,
+      transaction,
+    });
+
+    await transaction.commit();
+
+    io.emit(`object-${roomId}-update`, { nodes, userId: req.userId });
+    return res
+      .status(200)
+      .json({ updatedObjectIds: nodes.map((node) => node.key) });
   } catch (error) {
-    return res.status(500).send({ error: error });
+    await transaction.rollback();
+    return res.status(500).send({ error: `Error when update nodes: ${error}` });
   }
 });
 
-objectRouter.delete("/:objectId", async (req, res, next) => {
+objectRouter.delete("/", isAuthenticated, async (req, res) => {
+  const { roomId, objectIds } = req.body;
+
+  const transaction = await Object.sequelize.transaction();
+
   try {
-    const { objectId } = req.params;
+    let values = objectIds.map((id) => `(${id}, ${roomId})`).join(", ");
 
-    const object = await Object.findByPk(objectId);
-    if (!object) {
-      return res.status(404).json({ error: "Object not found" });
-    }
+    const sql = `
+      WITH vals AS (
+          VALUES ${values}
+      )
+      DELETE FROM "Objects"
+      USING vals
+      WHERE "Objects"."key" = vals.column1 AND "Objects"."RoomId" = vals.column2;
+    `;
 
-    await Object.update(
-      { parent: object.parent },
-      { where: { parent: objectId } }
-    );
+    await Object.sequelize.query(sql, {
+      transaction,
+    });
 
-    await object.destroy();
-    io.emit(`object-${object.RoomId}-delete`, object);
-    return res.status(200).json({ object: object });
+    await transaction.commit();
+
+    io.emit(`object-${roomId}-delete`, {
+      keys: objectIds,
+      userId: req.userId,
+    });
+
+    return res
+      .status(200)
+      .json({ updatedObjectIds: objectIds.map((node) => node.key) });
   } catch (error) {
-    return res.status(500).send({ error: error });
+    await transaction.rollback();
+    return res.status(500).send({ error: `Error when delete nodes: ${error}` });
   }
 });

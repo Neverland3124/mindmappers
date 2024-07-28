@@ -12,7 +12,6 @@ export class RoomApiService {
   roomRouter = this.endpoint + '/api/rooms';
   webhookRouter = this.endpoint + '/api/webhooks';
 
-  token = localStorage.getItem('access_token') || '';
   constructor(private http: HttpClient) {}
 
   /**
@@ -23,11 +22,7 @@ export class RoomApiService {
   getRooms(): Observable<{ rooms: Room[]; count: number }> {
     return this.http.get<{ rooms: Room[]; count: number }>(
       `${this.roomRouter}/`,
-      {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      },
+      {},
     );
   }
 
@@ -44,20 +39,27 @@ export class RoomApiService {
         name: roomName,
         description: description,
       },
+      {},
+    );
+  }
+
+  editRoom(
+    roomId: number,
+    roomName: string,
+    description: string,
+  ): Observable<Room> {
+    return this.http.patch<Room>(
+      `${this.roomRouter}/${roomId}`,
       {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
+        name: roomName,
+        description: description,
       },
+      {},
     );
   }
 
   deleteRoom(roomId: number): Observable<Room> {
-    return this.http.delete<Room>(`${this.roomRouter}/${roomId}`, {
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
-    });
+    return this.http.delete<Room>(`${this.roomRouter}/${roomId}`, {});
   }
 
   /**
@@ -95,19 +97,16 @@ export class RoomApiService {
     return JSON.parse(roomData);
   }
 
-  sendInvite(name: string, email: string, roomName: string) {
+  sendInvite(name: string, email: string, roomName: string, roomId: number) {
     return this.http.post(
       `${this.webhookRouter}/invite`,
       {
         name,
         email,
         roomName,
+        roomId,
       },
-      {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      },
+      {},
     );
   }
 }

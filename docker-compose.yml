@@ -26,6 +26,15 @@ services:
     environment:
       - DEFAULT_EMAIL=felixyy.lee@mail.utoronto.ca
       - NGINX_PROXY_CONTAINER=nginx-proxy
+  # Redis
+  redis:
+    restart: always
+    container_name: redis
+    # you can browse all images at https://hub.docker.com/
+    image: redis:7.2.5-alpine
+    # what am I exposing to the public
+    ports:
+      - 6379:6379 # HOST:CONTAINER
   postgresdb:
     image: 'postgres:12-alpine'
     container_name: postgresdb
@@ -43,14 +52,15 @@ services:
     expose:
       - 80
     environment:
-      - VIRTUAL_HOST=felixlyy.me,www.felixlyy.me,www.mindmappers.felixlyy.me
-      - LETSENCRYPT_HOST=felixlyy.me,www.felixlyy.me,www.mindmappers.felixlyy.me
+      - VIRTUAL_HOST=www.mindmappers.felixlyy.me
+      - LETSENCRYPT_HOST=www.mindmappers.felixlyy.me
   backend:
     image: ghcr.io/utsc-cscc09-programming-on-the-web/vertohealthjuniors-backend:${VERSION}
     container_name: backend
     restart: always
     depends_on:
       - postgresdb
+      - redis
     ports:
       - "3000:3000"
     environment:

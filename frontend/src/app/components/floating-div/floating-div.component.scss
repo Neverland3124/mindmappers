@@ -1,0 +1,14 @@
+.full-logo {
+  width: 225px;
+  height: auto;
+  bottom: 20px; /* Place at the bottom of the page */
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+  color: rgb(0, 0, 0);
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 20px;
+  border-radius: 20px;
+  user-select: none;
+  cursor: pointer;
+}

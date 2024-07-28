@@ -1,5 +1,7 @@
 export interface GetMeResponse {
+  id: number;
   email: string;
-  picture: string;
+  avatar: string;
   access_token: string;
+  name: string;
 }

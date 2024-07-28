@@ -1,74 +1,129 @@
+body,
+html {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+
 .container {
-  display: flex;
- 
-  height: 100vh; /* Full viewport height */
-  background-image: linear-gradient(to right, #6699ff, #ccffff);
-  background-image: url('../../../media/mind-mapping.jpg');
-  background-size: cover; /* Cover the entire page */
+  position: relative;
+  z-index: 1;
+}
+
+.container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("/assets/background.png");
+  background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.6;
+  z-index: -1;
+}
 
-  .left-half, .right-half {
-    flex: 1; /* Each takes half of the container's width */
-    display: flex;
-    justify-content: center; /* Center content horizontally */
-    align-items: center; /* Center content vertically */
-  }
+.container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.2); /* Adjust the opacity as needed */
+  z-index: -1;
+}
 
-    /* Adding a pseudo-element for the semi-transparent overlay */
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 255, 255, 0.8); /* White with 50% opacity */
-      z-index: 0;
-    }
-  
-    /* Ensure content is layered above the pseudo-element */
-    > * {
-      position: relative;
-      z-index: 1;
-    }
+.header {
+  background-color: rgba(255, 255, 255, 0.96);
+  padding: 6px 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 2;
+}
 
-  .header {
-    text-align: left; /* Center text horizontally */
-    margin-bottom: 20px; /* Example margin */
-    margin-left: 100px;
+.logo {
+  cursor: pointer;
+  user-select: none;
+  // background-color: white;
+}
 
-    h1 {
-      font-size: 84px; /* Adjust font size as needed */
-      margin: 0; /* Remove default margin */
-      line-height: 1; /* Ensures vertical centering */
-      vertical-align: middle; /* Vertical alignment for inline elements */
-    }
-  }
+.logo-image {
+  height: 40px;
+  width: 40px;
+}
 
-  
+.logo-text {
+  margin-left: 4px;
+  height: 28px;
+  width: auto;
+}
 
-  .images{
-    width: 1000px; /* Adjust width as needed */
-    height: 400px; /* Adjust height as needed */
-  }
+.nav-buttons {
+  display: flex;
+  gap: 10px;
+}
 
-  .image-container{
-    display: flex;
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
-  }
+.nav-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  background-color: #ffffff;
+  transition: box-shadow 0.3s ease;
+  color: #196dc2;
+}
 
-  .login-card{
-    width: 600px;
-    height: 400px;
-    background-color: #f9f9f9;
-    border-radius: 20px;
-    padding: 10px;
-    height: auto;
-    margin-right: 10px;
-  }
-  .flex-container {
-    display: flex;
-    width: 100%;
-  }
+.nav-button:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.hero-section {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.background-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.margin-left-5px {
+  margin-left: 5px;
+}
+
+.nav-text {
+  font-weight: bold;
+}
+
+.loading-container {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

@@ -24,17 +24,19 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
+              "src/assets",
               {
                 "glob": "**/*",
-                "input": "public"
+
+                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                "output": "/assets/"
               }
             ],
             "styles": [
               "./node_modules/ng-zorro-antd/ng-zorro-antd.min.css",
-              "node_modules/angular2-draggable/css/resizable.min.css",
               "src/styles.scss"
             ],
-            "scripts": ["./node_modules/leader-line/leader-line.min.js"]
+            "scripts": []
           },
           "configurations": {
             "production": {

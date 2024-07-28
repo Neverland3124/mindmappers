@@ -13,26 +13,35 @@ import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzCarouselModule } from 'ng-zorro-antd/carousel';
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
+import { NzAvatarModule } from 'ng-zorro-antd/avatar';
+import { NzDividerModule } from 'ng-zorro-antd/divider';
+import { NzUploadModule } from 'ng-zorro-antd/upload';
+
 import { HomeComponent } from './pages/home/home.component';
 import { RouterModule, Routes } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import { SocketService } from './services/socket.service';
 
 import { AppComponent } from './app.component';
 import { SignInComponent } from './pages/sign-in/sign-in.component';
 import { TopNavBarComponent } from './components/top-nav-bar/top-nav-bar.component';
-import { SignInBtnComponent } from './components/sign-in-btn/sign-in-btn.component';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ApiInterceptor } from './api.interceptor';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CanvasComponent } from './components/canvas/canvas.component';
-import { AngularDraggableModule } from 'angular2-draggable';
-import { ResizableModule } from 'angular-resizable-element';
-import { ResizeComponent } from './object/resize/resize.component';
-import { LineComponent } from './object/line/line.component';
 import { RoomComponent } from './components/room/room.component';
-import { InviteModalComponent } from './components/modal/modal.component';
+import { InviteModalComponent } from './components/invite-modal/invite-modal.component';
+import { GoCanvasComponent } from './components/gocanvas/gocanvas.component';
+import { GojsAngularModule } from 'gojs-angular';
+import { ImageModalComponent } from './components/image-modal/image-modal.component';
+import { CreateRoomModalComponent } from './components/create-room-modal/create-room-modal.component';
+import { EditRoomModalComponent } from './components/edit-room-modal/edit-room-modal.component';
+import { AboutModalComponent } from './components/about-modal/about-modal.component';
+import { InstructionModalComponent } from './components/instruction-modal/instruction-modal.component';
+import { FloatingDivComponent } from './components/floating-div/floating-div.component';
 
 /** config angular i18n **/
 import { registerLocaleData } from '@angular/common';
@@ -48,12 +57,15 @@ const appRoutes: Routes = [{ path: '', component: SignInComponent }];
     HomeComponent,
     SignInComponent,
     TopNavBarComponent,
-    SignInBtnComponent,
-    CanvasComponent,
-    ResizeComponent,
-    LineComponent,
     RoomComponent,
     InviteModalComponent,
+    GoCanvasComponent,
+    ImageModalComponent,
+    CreateRoomModalComponent,
+    EditRoomModalComponent,
+    AboutModalComponent,
+    InstructionModalComponent,
+    FloatingDivComponent,
   ],
   imports: [
     DragDropModule,
@@ -68,8 +80,6 @@ const appRoutes: Routes = [{ path: '', component: SignInComponent }];
     NzButtonModule,
     NzListModule,
     RouterModule.forRoot(appRoutes),
-    AngularDraggableModule,
-    ResizableModule,
     NzFormModule,
     NzInputModule,
     NzRadioModule,
@@ -78,6 +88,14 @@ const appRoutes: Routes = [{ path: '', component: SignInComponent }];
     NzCardModule,
     NzCarouselModule,
     BrowserAnimationsModule,
+    GojsAngularModule,
+    NzPopconfirmModule,
+    NzToolTipModule,
+    NzSpinModule,
+    NzSkeletonModule,
+    NzAvatarModule,
+    NzDividerModule,
+    NzUploadModule,
   ],
   providers: [
     {

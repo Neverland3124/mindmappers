@@ -1,10 +1,12 @@
 <nz-layout class="top-nav">
   <nz-header class="header">
-    <div class="logo">
+    <div class="logo" (click)="refreshPage()">
+      <img src="assets/logo-transparent.png" class="top-nav-img" />
       <span class="logo-text">{{ title }}</span>
     </div>
     <div class="user-info">
-      <span>Welcome, {{ user.email }}</span>
+      <span>Welcome, {{ user.name }}</span>
+      <img [src]="user.avatar" class="top-nav-img" />
     </div>
     <button nz-button nzType="primary" (click)="logout()">Logout</button>
   </nz-header>

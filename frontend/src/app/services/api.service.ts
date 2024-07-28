@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { User } from '../classes/user';
 import { GetMeResponse } from '../classes/response';
 import { HttpHeaders } from '@angular/common/http';
 
@@ -13,8 +12,6 @@ export class ApiService {
   endpoint = environment.apiEndpoint;
 
   oauth2Router = this.endpoint + '/api/oauth2';
-
-  token = localStorage.getItem('access_token') || '';
 
   constructor(private http: HttpClient) {}
 
@@ -33,11 +30,33 @@ export class ApiService {
    * @returns {Observable<GetMeResponse>}
    */
   me(): Observable<GetMeResponse> {
-    return this.http.get<GetMeResponse>(`${this.endpoint}/api/oauth2/me`, {
-      headers: {
-        Authorization: `Bearer ${this.token}`,
+    return this.http.get<GetMeResponse>(`${this.endpoint}/api/oauth2/me`, {});
+  }
+
+  refreshToken(): Observable<{ access_token: string }> {
+    return this.http
+      .post<{ access_token: string }>(`${this.oauth2Router}/refresh`, {}, {})
+      .pipe(
+        tap((response) => {
+          const newToken = response.access_token;
+          this.setAccessToken(newToken);
+        }),
+      );
+  }
+
+  /**
+   * Log out
+   */
+  signOut() {
+    return this.http.post(
+      `${this.oauth2Router}/signout`,
+      {},
+      {
+        headers: new HttpHeaders({
+          'X-Skip-Interceptor': 'true', // Custom header to skip interceptor
+        }),
       },
-    });
+    );
   }
 
   /**
@@ -46,7 +65,7 @@ export class ApiService {
    * @returns {string}
    */
   getAccessToken() {
-    return this.token;
+    return localStorage.getItem('access_token') || '';
   }
 
   /**
@@ -56,27 +75,38 @@ export class ApiService {
    */
   setAccessToken(token: string) {
     if (!token) {
+      localStorage.removeItem('access_token');
       return;
     }
-    this.token = token;
     localStorage.setItem('access_token', token);
   }
 
-  /**
-   * Log out
-   */
-  signOut() {
-    const removeToken = this.token;
-    this.token = '';
-    localStorage.removeItem('access_token');
-    return this.http.post(
-      `${this.oauth2Router}/signout`,
+  getIsCollapsed() {
+    return localStorage.getItem('isCollapsed') === 'true';
+  }
+
+  setIsCollapsed(isCollapsed: boolean) {
+    localStorage.setItem('isCollapsed', isCollapsed ? 'true' : 'false');
+  }
+
+  getScrollMode() {
+    if (localStorage.getItem('scrollMode') === null) {
+      // default is infinite scroll
+      return true;
+    }
+    return localStorage.getItem('scrollMode') === 'true';
+  }
+
+  setScrollMode(scrollMode: boolean) {
+    // true means infinite scroll, false means pagination
+    localStorage.setItem('scrollMode', scrollMode ? 'true' : 'false');
+  }
+
+  freeTrial(): Observable<{ access_token: string }> {
+    return this.http.post<{ access_token: string }>(
+      `${this.endpoint}/api/oauth2/freetrial`,
       {},
-      {
-        headers: new HttpHeaders({
-          Authorization: `Bearer ${removeToken}`,
-        }),
-      },
+      {},
     );
   }
 }

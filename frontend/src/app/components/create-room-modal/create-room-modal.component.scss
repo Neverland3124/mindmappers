@@ -1,0 +1,46 @@
+.form-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px; /* Adds space between each form group */
+
+  label {
+    width: 100px; /* Fixed width for all labels */
+    margin-right: 10px; /* Adds space between the label and the input */
+  }
+
+  .form-input {
+    flex-grow: 1; /* Allows input to take up remaining space */
+    margin-left: 5px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 5px 0;
+
+    &:hover {
+      border-color: rgb(
+        115,
+        191,
+        212
+      ); /* Sets border color to darkblue on hover */
+    }
+
+    &:focus {
+      border-color: rgb(
+        23,
+        83,
+        152
+      ); /* Sets border color to blue when selected/focused */
+      outline: none; /* Removes the default focus outline */
+    }
+  }
+}
+
+.error-box {
+  color: red;
+  margin-bottom: 10px;
+}
+
+.confirm-box {
+  color: green;
+  margin-bottom: 10px;
+}

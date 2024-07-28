@@ -1,9 +1,11 @@
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { ApiService } from '../../services/api.service';
-import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { User } from '../../classes/user';
 import { GetMeResponse } from '../../classes/response';
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { AboutModalComponent } from '../../components/about-modal/about-modal.component';
 
 @Component({
   selector: 'app-sign-in',
@@ -18,56 +20,50 @@ export class SignInComponent implements OnInit {
   @Output() homePage = new EventEmitter<boolean>();
 
   access_token: string = this.apiService.getAccessToken() || '';
-
+  isLoading: boolean = true;
   constructor(
     private apiService: ApiService,
-    private route: ActivatedRoute,
+    private router: Router,
+    private modalService: NzModalService,
   ) {
     this.title = environment.productName;
+    this.handleAuthCallback();
   }
 
-  images = [
-    { url: 'https://picsum.photos/1920/1080?random=1', alt: 'Image 1 Description' },
-    { url: 'https://picsum.photos/1920/1080?random=2', alt: 'Image 2 Description' },
-    // Add more images as needed
-  ];
+  handleAuthCallback() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('access_token');
+    const roomId = urlParams.get('roomId');
+    if (token) {
+      this.apiService.setAccessToken(token);
+    }
+    if (roomId) {
+      sessionStorage.setItem('roomId', roomId);
+    }
+    if (token || roomId) {
+      this.router.navigate(['/']);
+    }
+  }
 
   ngOnInit() {
-    this.route.queryParams.subscribe((params) => {
-      this.access_token = this.apiService.getAccessToken();
-      // User is redirected back from OAuth2 server
-      if (params['access_token']) {
-        this.apiService.setAccessToken(params['access_token']);
-        this.access_token = this.apiService.getAccessToken();
-        window.location.href = '/';
-      } else {
-        this.apiService.me().subscribe({
-          next: (response) => {
-            // Move to home page
-            this.sentUser(this.maskUser(response));
-            this.showHomePage();
-            // update access token
-            this.apiService.setAccessToken(response.access_token);
-          },
-          error: (error) => {
-            console.error('An error occurred', error);
-            this.apiService.setAccessToken('');
-            this.access_token = '';
-          },
-        });
-      }
-      // Check if user is already signed in
-      if (!this.access_token) {
-        return;
-      }
-      // Get user info
+    this.apiService.me().subscribe({
+      next: (response) => {
+        this.sentUser(this.maskUser(response));
+        this.showHomePage();
+        this.apiService.setAccessToken(response.access_token);
+      },
+      error: (error) => {
+        this.isLoading = false;
+      },
     });
   }
 
   maskUser(response: GetMeResponse) {
     return {
+      id: response.id,
       email: response.email,
-      picture: response.picture,
+      avatar: response.avatar,
+      name: response.name,
     };
   }
 
@@ -90,5 +86,24 @@ export class SignInComponent implements OnInit {
     this.apiService.signIn().subscribe((obj) => {
       window.location.href = obj.url;
     });
+  }
+
+  showAbout() {
+    this.modalService.create({
+      nzTitle: 'About MindMappers',
+      nzContent: AboutModalComponent,
+      nzFooter: null,
+    });
+  }
+
+  freeTrial() {
+    this.apiService.freeTrial().subscribe((obj) => {
+      this.apiService.setAccessToken(obj.access_token);
+      window.location.href = '/';
+    });
+  }
+
+  reloadPage() {
+    window.location.reload();
   }
 }
