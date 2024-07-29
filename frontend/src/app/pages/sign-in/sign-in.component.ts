@@ -6,6 +6,7 @@ import { User } from '../../classes/user';
 import { GetMeResponse } from '../../classes/response';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { AboutModalComponent } from '../../components/about-modal/about-modal.component';
+import { CreditsModalComponent } from '../../components/credits-modal/credits-modal.component';
 
 @Component({
   selector: 'app-sign-in',
@@ -92,6 +93,14 @@ export class SignInComponent implements OnInit {
     this.modalService.create({
       nzTitle: 'About MindMappers',
       nzContent: AboutModalComponent,
+      nzFooter: null,
+    });
+  }
+
+  showCredits() {
+    this.modalService.create({
+      nzTitle: 'Credit Page',
+      nzContent: CreditsModalComponent,
       nzFooter: null,
     });
   }

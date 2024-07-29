@@ -42,6 +42,7 @@ import { EditRoomModalComponent } from './components/edit-room-modal/edit-room-m
 import { AboutModalComponent } from './components/about-modal/about-modal.component';
 import { InstructionModalComponent } from './components/instruction-modal/instruction-modal.component';
 import { FloatingDivComponent } from './components/floating-div/floating-div.component';
+import { CreditsModalComponent } from './components/credits-modal/credits-modal.component';
 
 /** config angular i18n **/
 import { registerLocaleData } from '@angular/common';
@@ -66,6 +67,7 @@ const appRoutes: Routes = [{ path: '', component: SignInComponent }];
     AboutModalComponent,
     InstructionModalComponent,
     FloatingDivComponent,
+    CreditsModalComponent,
   ],
   imports: [
     DragDropModule,
