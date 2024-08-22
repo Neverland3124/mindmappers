@@ -8,7 +8,6 @@ on:
   push:
     branches:
       - main
-      - feature-try-microservices
     paths:
       - backend/image-microservice/**
       - .github/workflows/build-backend-image.yml

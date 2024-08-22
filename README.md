@@ -30,19 +30,19 @@
 - Frontend
   
 ## Technologies
-- NodeJS + ExpressJS for backend run time and server
-- PostgreSQL + sequelize for store data
-- Google Oauth2 for user login
-- Redis + ioredis library for cache token
-- Ant Design as UI library
-- socket.io for websocket
-- OpenAI for ai image generation
-- AWS S3 for image storage and get
-- Mailersend for send email and trigger webhook
-- Docker + GHCR for CICD and monolith deploy
-- Kubernetes + GKE for microservices deploy
-- AngularJS for frontend framework
-- GoJS for diagram and map
+- `Node.js` + `Express.js` for backend runtime and server
+- `PostgreSQL` + `Sequelize` for data storage
+- `Google OAuth 2.0` for user authentication
+- `Redis` + `ioredis` library for token caching
+- `Ant Design` as the UI library
+- `Socket.IO` for WebSocket communication
+- `OpenAI` for AI image generation
+- `AWS S3` for image storage and retrieval
+- `MailerSend` for sending emails and triggering webhooks
+- `Docker` + `GitHub Container Registry (GHCR)` for CI/CD and monolithic deployment
+- `Kubernetes` + `Google Kubernetes Engine (GKE)` for microservices deployment
+- `AngularJS` for the frontend framework
+- `GoJS` for diagrams and maps
 
 ## License
 

@@ -9,7 +9,6 @@ on:
   push:
     branches:
       - main
-      - feature-try-microservices
     paths:
       # ** matches any files and directories recursively under the specified path
       - frontend/**
