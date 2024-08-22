@@ -1,0 +1,290 @@
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs
+      - ./vhost:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+    profiles:
+      - production
+    networks:
+      - mindmappers-network
+
+  nginx-proxy-acme:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    depends_on:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/etc/nginx/certs
+      - ./vhost:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+      - ./acme:/etc/acme.sh
+    environment:
+      - DEFAULT_EMAIL=zhitao.xu@mail.utoronto.ca
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+    profiles:
+      - production
+    networks:
+      - mindmappers-network
+
+  redis:
+    restart: always
+    container_name: redis
+    image: redis:7.2.5-alpine
+    ports:
+      - 6380:6379
+    networks:
+      - mindmappers-network
+
+  postgresdb-auth:
+    image: 'postgres:12-alpine'
+    container_name: postgresdb-auth
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME_AUTH}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - db-auth:/var/lib/postgresql/DATABASE_NAME_AUTH
+    networks:
+      - mindmappers-network
+
+  postgresdb-object:
+    image: 'postgres:12-alpine'
+    container_name: postgresdb-object
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME_OBJECT}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - db-object:/var/lib/postgresql/DATABASE_NAME_OBJECT
+    networks:
+      - mindmappers-network
+
+  postgresdb-image:
+    image: 'postgres:12-alpine'
+    container_name: postgresdb-image
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME_IMAGE}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "5435:5432"
+    volumes:
+      - db-image:/var/lib/postgresql/DATABASE_NAME_IMAGE
+    networks:
+      - mindmappers-network
+
+  frontend:
+    image: ghcr.io/neverland3124/mindmappers-frontend:${VERSION}
+    container_name: frontend
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - VIRTUAL_HOST=www.mindmappers.felixlyy.me
+      - LETSENCRYPT_HOST=www.mindmappers.felixlyy.me
+    profiles:
+      - production
+    networks:
+      - mindmappers-network
+
+  frontend-dev:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+    container_name: frontend-dev
+    restart: always
+    ports:
+      - "4200:80"
+    environment:
+      - VIRTUAL_HOST=www.mindmappers.felixlyy.me
+      - LETSENCRYPT_HOST=www.mindmappers.felixlyy.me
+    profiles:
+      - development
+    networks:
+      - mindmappers-network
+
+  auth-microservice:
+    image: ghcr.io/neverland3124/mindmappers-auth-microservice:${VERSION}
+    container_name: auth-microservice
+    restart: always
+    depends_on:
+      - postgresdb
+    ports:
+      - "3001:3000"
+    profiles:
+      - production
+    networks:
+      - mindmappers-network
+
+  auth-microservice-dev:
+    build:
+      context: ../../backend
+      dockerfile: auth-microservice/Dockerfile
+    env_file:
+      - ../../backend/auth-microservice/.env
+    container_name: auth-microservice-dev
+    restart: always
+    depends_on:
+      - postgresdb-auth
+    ports:
+      - "3001:3000"
+      - "50051:50051"
+    profiles:
+      - development
+    networks:
+      - mindmappers-network
+
+  object-microservice:
+    image: ghcr.io/neverland3124/mindmappers-image-microservice:${VERSION}
+    env_file:
+      - ../../backend/object-microservice/.env
+    container_name: object-microservice
+    restart: always
+    depends_on:
+      - postgresdb-object
+      - auth-microservice-dev
+    ports:
+      - "3002:3000"
+      - "50052:50051"
+    profiles:
+      - production
+    networks:
+      - mindmappers-network
+
+  object-microservice-dev:
+    build:
+      context: ../../backend
+      dockerfile: object-microservice/Dockerfile
+    env_file:
+      - ../../backend/object-microservice/.env
+    container_name: object-microservice-dev
+    restart: always
+    depends_on:
+      - postgresdb-object
+      - auth-microservice-dev
+    ports:
+      - "3002:3000"
+      - "10052:10052"
+    profiles:
+      - development
+    networks:
+      - mindmappers-network
+
+  image-microservice:
+    image: ghcr.io/neverland3124/mindmappers-image-microservice:${VERSION}
+    container_name: image-microservice
+    restart: always
+    depends_on:
+      - postgresdb-image
+      - redis
+    ports:
+      - "3003:3000"
+    profiles:
+      - production
+    networks:
+      - mindmappers-network
+
+  image-microservice-dev:
+    build:
+      context: ../../backend/image-microservice
+      dockerfile: Dockerfile
+    env_file:
+      - ../../backend/image-microservice/.env
+    container_name: image-microservice-dev
+    restart: always
+    depends_on:
+      - postgresdb-image
+      - redis
+      - object-microservice-dev
+    ports:
+      - "3003:3000"
+    profiles:
+      - development
+    networks:
+      - mindmappers-network
+
+  image-worker-microservice:
+    image: ghcr.io/neverland3124/mindmappers-image-worker-microservice:${VERSION}
+    container_name: image-worker-microservice
+    restart: always
+    depends_on:
+      - postgresdb-image
+      - redis
+    profiles:
+      - production
+    networks:
+      - mindmappers-network
+
+  image-worker-microservice-dev:
+    build:
+      context: ../../backend
+      dockerfile: image-worker-microservice/Dockerfile
+    env_file:
+      - ../../backend/image-worker-microservice/.env
+    container_name: image-worker-microservice-dev
+    restart: always
+    depends_on:
+      - postgresdb-image
+      - redis
+    profiles:
+      - development
+    networks:
+      - mindmappers-network
+
+  api-gateway:
+    image: ghcr.io/neverland3124/mindmappers-api-gateway:${VERSION}
+    container_name: api-gateway
+    restart: always
+    ports:
+      - "3000:3000"
+    profiles:
+      - production
+    networks:
+      - mindmappers-network
+
+  api-gateway-dev:
+    build:
+      context: ../../backend
+      dockerfile: api-gateway/Dockerfile
+    env_file:
+      - ../../backend/api-gateway/.env
+    container_name: api-gateway-dev
+    restart: always
+    depends_on:
+      - redis
+    ports:
+      - "3000:3000"
+    profiles:
+      - development
+    networks:
+      - mindmappers-network
+
+volumes:
+  db-auth:
+  db-object:
+  db-image:
+
+networks:
+  mindmappers-network:
+    driver: bridge
+
+## Commands
+# Local testing
+# docker compose --profile development up --build
+# Production deployment - need to set environment variables, so not working yet
+# docker compose --profile production up --build

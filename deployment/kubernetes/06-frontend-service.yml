@@ -1,0 +1,70 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: default
+  labels:
+    app: frontend
+    api: external
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+        api: external
+    spec:
+      containers:
+        - image: ghcr.io/neverland3124/mindmappers-frontend:latest
+          name: frontend
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "64Mi" # Kubernetes guarantees 64Mi of memory to the container
+              cpu: "250m" # Kubernetes guarantees 250 millicores (0.25 CPU) to the container
+            limits:
+              memory: "1024Mi" # The container can use up to 1024Mi of memory
+              cpu: "500m" # The container can use up to 500 millicores (0.5 CPU)
+      imagePullSecrets:
+        - name: ghcr-secret
+      restartPolicy: Always
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: default
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+  labels:
+    app: frontend
+spec:
+  # externalTrafficPolicy: Local
+  type: ClusterIP
+  # loadBalancerIP: 34.132.192.41
+  # type: LoadBalancer
+  # type: LoadBalancer - cloud providers can have this
+  ports:
+    # 80 as we use nginx to serve the frontend to port 80
+      # port - the service listens on
+    - protocol: TCP
+      port: 80
+      # targetPort - the service forwards traffic to
+      targetPort: 80
+      # nodePort - the port on each node on which this service is exposed
+      # nodePort: 32200 # 30000 to 32767
+      # get <node-ip> by running `kubectl get nodes -o wide` or `minikube ip`
+      # This configuration allows access to the frontend from the browser via <node-ip>:32200
+      # and internally within the cluster (by other pods) via <service-name>:4200
+      # or <cluster-ip>:4200 using curl in the cluster terminal
+      # Both will forward traffic to port 80 on the container
+  selector:
+    app: frontend

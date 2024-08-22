@@ -1,0 +1,76 @@
+name: Backend Api Gateway CI/CD
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+  push:
+    branches:
+      - main
+      - feature-try-microservices
+    paths:
+      - backend/api-gateway/**
+      - backend/protos/**
+      - .github/workflows/build-backend-api-gateway.yml
+env:
+  IMAGE_NAME: mindmappers-backend-api-gateway
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build image
+        # don't need to pass in secrets as k8s build we will use secrets there
+        # env:
+        #   ORIGIN: ${{ secrets.ORIGIN }}
+        #   REDIS_HOST: ${{ secrets.REDIS_HOST }}
+        #   REDIS_PORT: ${{ secrets.REDIS_PORT }}
+        run: |
+          docker build . --file api-gateway/Dockerfile \
+          --tag $(echo $IMAGE_NAME | tr '[:upper:]' '[:lower:]') \
+
+      - name: Log into GitHub Container Registry
+        run: echo "${{ secrets.CR_PAT }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image to GitHub Container Registry
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+
+  ## cicd deploy - may need for k8s later
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: push
+  #   steps:
+  #     - name: SSH and deploy with docker-compose
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: ${{ secrets.REMOTE_HOST }}
+  #         username: ${{ secrets.REMOTE_USER }}
+  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         passphrase: ${{ secrets.SSH_PASSPHRASE }}
+  #         script: |
+  #           # Strip git ref prefix from version
+  #           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+  #           # Strip "v" prefix from tag name
+  #           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+  #           # Use Docker `latest` tag convention
+  #           [ "$VERSION" == "main" ] && VERSION=latest
+  #           echo "Deploying version $VERSION"
+  #           sudo docker-compose down
+  #           sudo VERSION=$VERSION docker-compose pull
+  #           sudo VERSION=$VERSION DATABASE_NAME=${{ secrets.DATABASE_NAME }} DATABASE_USER=${{ secrets.DATABASE_USER }} DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} docker-compose up -d

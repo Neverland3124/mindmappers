@@ -1,0 +1,24 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt-prod
+  namespace: default
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: zhitao.xu@mai.utoronto.ca # Replace with your email address
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+# apiVersion: networking.gke.io/v1
+# kind: ManagedCertificate
+# metadata:
+#   name: mindmappers-cert
+#   namespace: default
+# spec:
+#   domains:
+#     - mindmappers.neverland3124.me
+#     - api-mindmappers.neverland3124.me

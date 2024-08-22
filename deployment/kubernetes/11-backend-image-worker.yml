@@ -1,0 +1,41 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-worker-microservice
+  namespace: default
+  labels:
+    app: image-worker-microservice
+    api: external
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-worker-microservice
+  template:
+    metadata:
+      labels:
+        app: image-worker-microservice
+        api: external
+    spec:
+      containers:
+        - image: ghcr.io/neverland3124/mindmappers-backend-image-worker-microservice:latest
+          name: image-worker-microservice
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "64Mi" # Kubernetes guarantees 64Mi of memory to the container
+              cpu: "250m" # Kubernetes guarantees 250 millicores (0.25 CPU) to the container
+            limits:
+              memory: "1024Mi" # The container can use up to 1024Mi of memory
+              cpu: "500m" # The container can use up to 500 millicores (0.5 CPU)
+          envFrom:
+            - configMapRef:
+                name: app-configmap
+            - secretRef:
+                name: secret-env
+      imagePullSecrets:
+        - name: ghcr-secret
+      restartPolicy: Always
+
+# no need for service since this is a worker microservice

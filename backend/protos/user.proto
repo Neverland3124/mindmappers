@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package mindmappers;
+
+service UserInfoService {
+    rpc getUserInfo (getUserInfoRequest) returns (UserInfoResponse);
+    rpc getUserToken (freshTokenRequest) returns (UserTokenResponse);
+}
+
+message getUserInfoRequest {
+    string UserID = 1;
+}
+
+message UserInfoResponse {
+    string UserID = 1;
+    string UserName = 2;
+    string UserAvatar = 3;
+}
+
+message freshTokenRequest {
+    string oldToken = 1;
+}
+
+message UserTokenResponse {
+    string newToken = 1;
+    string UserID = 2;
+    string UserName = 3;
+    string UserEmail = 4;
+}

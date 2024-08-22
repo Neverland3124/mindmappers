@@ -1,58 +1,51 @@
-name: Update Docker Compose on VM
+# This workflow is for monolith cicd pipeline, not applicable for microservices
+# name: Update Docker Compose on VM
 
-on:
-  pull_request:
-    types: [closed]
-    branches:
-      - main
-      - develop-alpha-integrate
-      - develop-beta-integrate
-      - devops-CICD
-      - develop-final-integrate
-  push:
-    branches:
-      - main
-      - develop-alpha-integrate
-      - develop-beta-integrate
-      - devops-CICD
-      - develop-final-integrate
-    paths:
-      - docker-compose.yml
+# on:
+#   pull_request:
+#     types: [closed]
+#     branches:
+#       - main
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - docker-compose.yml
 
-jobs:
-  update-docker-compose:
-    runs-on: ubuntu-latest
-    name: Build
-    steps:
-    - uses: actions/checkout@v4
-    - name: copy file via ssh password
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.REMOTE_HOST }}
-        username: ${{ secrets.REMOTE_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        source: "docker-compose.yml"
-        target: "~/"
-  deploy:
-    runs-on: ubuntu-latest
-    needs: update-docker-compose
-    steps:
-      - name: SSH and deploy with docker-compose
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          script: |
-            # Strip git ref prefix from version
-            VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-            # Strip "v" prefix from tag name
-            [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-            # Use Docker `latest` tag convention
-            [ "$VERSION" == "main" ] && VERSION=latest
-            echo "Deploying version $VERSION"
-            sudo docker-compose down
-            sudo VERSION=$VERSION docker-compose pull
-            sudo VERSION=$VERSION DATABASE_NAME=${{ secrets.DATABASE_NAME }} DATABASE_USER=${{ secrets.DATABASE_USER }} DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} docker-compose up -d
+# jobs:
+#   update-docker-compose:
+#     runs-on: ubuntu-latest
+#     name: Build
+#     steps:
+#     - uses: actions/checkout@v4
+#     - name: copy file via ssh password
+#       uses: appleboy/scp-action@v0.1.7
+#       with:
+#         host: ${{ secrets.REMOTE_HOST }}
+#         username: ${{ secrets.REMOTE_USER }}
+#         key: ${{ secrets.SSH_PRIVATE_KEY }}
+#         passphrase: ${{ secrets.SSH_PASSPHRASE }}
+#         source: "docker-compose.yml"
+#         target: "~/"
+#   deploy:
+#     runs-on: ubuntu-latest
+#     needs: update-docker-compose
+#     steps:
+#       - name: SSH and deploy with docker-compose
+#         uses: appleboy/ssh-action@master
+#         with:
+#           host: ${{ secrets.REMOTE_HOST }}
+#           username: ${{ secrets.REMOTE_USER }}
+#           key: ${{ secrets.SSH_PRIVATE_KEY }}
+#           passphrase: ${{ secrets.SSH_PASSPHRASE }}
+#           script: |
+#             # Strip git ref prefix from version
+#             VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+#             # Strip "v" prefix from tag name
+#             [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+#             # Use Docker `latest` tag convention
+#             [ "$VERSION" == "main" ] && VERSION=latest
+#             echo "Deploying version $VERSION"
+#             sudo docker-compose down
+#             sudo VERSION=$VERSION docker-compose pull
+#             sudo VERSION=$VERSION DATABASE_NAME=${{ secrets.DATABASE_NAME }} DATABASE_USER=${{ secrets.DATABASE_USER }} DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} docker-compose up -d

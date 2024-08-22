@@ -1,0 +1,37 @@
+{
+  "name": "backend-image-microservice",
+  "version": "1.0.0",
+  "description": "microservice for image",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "format": "npx prettier --write .",
+    "start:dev": "nodemon index.js",
+    "clean": "rm -rf uploads/ && rm mindmappers.sqlite",
+    "start": "nodemon index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4",
+    "prettier": "^3.3.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.617.0",
+    "@aws-sdk/s3-request-presigner": "^3.617.0",
+    "@grpc/grpc-js": "^1.11.1",
+    "@grpc/proto-loader": "^0.7.13",
+    "async-mutex": "^0.5.0",
+    "axios": "^1.3.1",
+    "body-parser": "^1.20.2",
+    "bullmq": "^5.10.3",
+    "concurrently": "^8.2.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "http": "^0.0.1-security",
+    "openai": "^4.53.0",
+    "pg": "^8.12.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.3"
+  },
+  "author": "",
+  "license": "ISC"
+}

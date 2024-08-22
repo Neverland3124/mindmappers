@@ -1,0 +1,51 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mindmappers-ingress
+  namespace: default
+  annotations:
+    # kubernetes.io/ingress.regional-static-ip-name: "mindmappers"
+    # networking.gke.io/managed-certificates: "mindmappers-cert"
+    cert-manager.io/issuer: letsencrypt-prod
+    cert-manager.io/issue-temporary-certificate: "true"
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://mindmappers.neverland3124.me"
+    # nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    # nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type, Authorization"
+    # nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  # ingressClassName: nginx
+  tls:
+    - hosts:
+        - mindmappers.neverland3124.me
+        - api-mindmappers.neverland3124.me
+      secretName: web-ssl
+  defaultBackend:
+    service:
+      name: frontend
+      port:
+        number: 80
+  rules:
+    - host: mindmappers.neverland3124.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+    - host: api-mindmappers.neverland3124.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 3000

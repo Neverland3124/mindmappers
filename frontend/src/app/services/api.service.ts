@@ -21,6 +21,7 @@ export class ApiService {
    * @returns {Observable<{ url: string }>}
    */
   signIn(): Observable<{ url: string }> {
+    console.log("sign in", `${this.oauth2Router}/signin`);
     return this.http.post<{ url: string }>(`${this.oauth2Router}/signin`, {});
   }
 
@@ -103,6 +104,7 @@ export class ApiService {
   }
 
   freeTrial(): Observable<{ access_token: string }> {
+    console.log("free trial", `${this.endpoint}/api/oauth2/freetrial`);
     return this.http.post<{ access_token: string }>(
       `${this.endpoint}/api/oauth2/freetrial`,
       {},

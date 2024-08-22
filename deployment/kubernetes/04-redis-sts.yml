@@ -1,0 +1,58 @@
+# Headless Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-sts
+  namespace: default
+spec:
+  ports:
+  # export redis:6379 to the cluster
+  - port: 6379
+    name: redis-sts
+  # setting this to None makes the Service headless
+  clusterIP: None
+  selector:
+    app: redis-sts
+
+---
+
+# StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-sts
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: redis-sts
+  serviceName: "redis-sts"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis-sts
+    spec:
+      containers:
+      - name: redis
+        image: redis:7.2.5-alpine
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: redis-volume
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi

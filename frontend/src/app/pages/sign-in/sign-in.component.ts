@@ -105,8 +105,13 @@ export class SignInComponent implements OnInit {
     });
   }
 
+  goGithub() {
+    window.location.href = 'https://github.com/neverland3124/mindmappers';
+  }
+
   freeTrial() {
     this.apiService.freeTrial().subscribe((obj) => {
+      console.log("free trial returns", obj);
       this.apiService.setAccessToken(obj.access_token);
       window.location.href = '/';
     });

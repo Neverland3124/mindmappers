@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-configmap
+  namespace: default
+data:
+  VERSION: "latest"
+  REDIS_HOST: "redis-sts"
+  REDIS_PORT: "6379"
+  # DATABASE_NAME_AUTH: "test"
+  # DATABASE_NAME_OBJECT: "test2"
+  # DATABASE_NAME_IMAGE: "test3"
+  # DATABASE_HOST_AUTH: "postgresdb-auth"
+  # DATABASE_HOST_OBJECT: "postgresdb-object"
+  # DATABASE_HOST_IMAGE: "postgresdb-image"
+  DATABASE_NAME_AUTH: "test"
+  DATABASE_NAME_OBJECT: "test"
+  DATABASE_NAME_IMAGE: "test"
+  DATABASE_HOST_AUTH: "postgresdb"
+  DATABASE_HOST_OBJECT: "postgresdb"
+  DATABASE_HOST_IMAGE: "postgresdb"
+  DATABASE_PORT: "5432"
+  MICROSERVICE_AUTH_ORIGIN: "http://auth-microservice:3000"
+  MICROSERVICE_OBJECT_ORIGIN: "http://object-microservice:3000"
+  MICROSERVICE_IMAGE_ORIGIN: "http://image-microservice:3000"
+  ORIGIN: "https://mindmappers.neverland3124.me"
+  # frontend is mindmappers.neverland3124.me
+  # backend will be api-mindmappers.neverland3124.me
+  # local origin used to be 
+  # ORIGIN: "http://localhost:4200"
+
+

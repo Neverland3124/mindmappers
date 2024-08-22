@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package mindmappers;
+
+// Service for image generation get image info
+service RoomInfoService {
+    rpc getRoomInfo (getRoomInfoRequest) returns (RoomInfoResponse);
+}
+
+message getRoomInfoRequest {
+    string roomID = 1;
+}
+
+message RoomInfoResponse {
+    string roomID = 1;
+    string roomName = 2;
+    string roomDescription = 3;
+    string roomNodes = 4;
+}

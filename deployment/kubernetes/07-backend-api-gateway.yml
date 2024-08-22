@@ -1,0 +1,66 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: default
+  labels:
+    app: api-gateway
+    api: external
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+        api: external
+    spec:
+      containers:
+        - image: ghcr.io/neverland3124/mindmappers-backend-api-gateway:latest
+          name: api-gateway
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              memory: "64Mi" # Kubernetes guarantees 64Mi of memory to the container
+              cpu: "250m" # Kubernetes guarantees 250 millicores (0.25 CPU) to the container
+            limits:
+              memory: "1024Mi" # The container can use up to 1024Mi of memory
+              cpu: "500m" # The container can use up to 500 millicores (0.5 CPU)
+          envFrom:
+            - configMapRef:
+                name: app-configmap
+            - secretRef:
+                name: secret-env
+      imagePullSecrets:
+        - name: ghcr-secret
+      restartPolicy: Always
+
+---
+
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: default
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+    # cloud.google.com/backend-config: '{"default": "my-backendconfig"}'
+  labels:
+    app: api-gateway
+spec:
+  # externalTrafficPolicy: Local
+  type: ClusterIP
+  # loadBalancerIP: 34.132.192.41
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+      # nodePort: 32201
+  selector:
+    app: api-gateway

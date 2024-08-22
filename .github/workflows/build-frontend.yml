@@ -1,24 +1,22 @@
-name: Publish Angular Skeleton to GHCR
+name: Frontend CI/CD
 
 on:
   pull_request:
+    # Trigger the workflow when a pull request is closed
     types: [closed]
     branches:
       - main
-      - develop-alpha-integrate
-      - develop-beta-integrate
-      - develop-final-integrate
   push:
     branches:
       - main
-      - develop-alpha-integrate
-      - develop-beta-integrate
-      - develop-final-integrate
+      - feature-try-microservices
     paths:
+      # ** matches any files and directories recursively under the specified path
       - frontend/**
+      - .github/workflows/build-frontend.yml
 
 env:
-  IMAGE_NAME: vertohealthjuniors-frontend
+  IMAGE_NAME: mindmappers-frontend
 
 jobs:
   # Push image to GitHub Packages.
@@ -28,53 +26,66 @@ jobs:
     if: github.event_name == 'push'
     defaults:
       run:
+        # set the default working directory for all steps to the frontend directory
         working-directory: frontend
-    outputs:
-      image_version_lower: ${{ steps.set_lower.outputs.image_version_lower }}
+    # outputs:
+    #   image_version_lower: ${{ steps.set_lower.outputs.image_version_lower }}
     steps:
-      - uses: actions/checkout@v2
+      # checkout the repository
+      - uses: actions/checkout@v3
 
       - name: Build image
         run: docker build . --file Dockerfile --tag $(echo $IMAGE_NAME | tr '[:upper:]' '[:lower:]')
 
       - name: Log into GitHub Container Registry
-        run: echo "${{ secrets.CR_PAT }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
+        run: |
+          echo "${{ secrets.CR_PAT }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "Logged into GitHub Container Registry with actor ${{ github.actor }}"
+          # cat ~/.docker/config.json | base64 -w 0
 
       - name: Push image to GitHub Container Registry
         id: push_image
         run: |
+          # IMAGE_ID will be ghcr.io/neverland3124/mindmappers-frontend
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          ### set version of the image - right now ignored
           # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
           # Use Docker `latest` tag convention
-          [ "$VERSION" == "main" ] && VERSION=latest
+          # [ "$VERSION" == "main" ] && VERSION=latest
+
+          # Always use Docker `latest` tag
+          VERSION=latest
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
+
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
-  deploy:
-    runs-on: ubuntu-latest
-    needs: push
-    steps:
-      - name: SSH and deploy with docker-compose
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          script: |
-            # Strip git ref prefix from version
-            VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-            # Strip "v" prefix from tag name
-            [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-            # Use Docker `latest` tag convention
-            [ "$VERSION" == "main" ] && VERSION=latest
-            echo "Deploying version $VERSION"
-            sudo docker-compose down
-            sudo VERSION=$VERSION docker-compose pull
-            sudo VERSION=$VERSION DATABASE_NAME=${{ secrets.DATABASE_NAME }} DATABASE_USER=${{ secrets.DATABASE_USER }} DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} docker-compose up -d
+  # now we don't do deploy yet
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: push
+  #   steps:
+  #     - name: SSH and deploy with docker-compose
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: ${{ secrets.REMOTE_HOST }}
+  #         username: ${{ secrets.REMOTE_USER }}
+  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         passphrase: ${{ secrets.SSH_PASSPHRASE }}
+  #         script: |
+  #           # Strip git ref prefix from version
+  #           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+  #           # Strip "v" prefix from tag name
+  #           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+  #           # Use Docker `latest` tag convention
+  #           [ "$VERSION" == "main" ] && VERSION=latest
+  #           echo "Deploying version $VERSION"
+  #           sudo docker-compose down
+  #           sudo VERSION=$VERSION docker-compose pull
+  #           sudo VERSION=$VERSION DATABASE_NAME=${{ secrets.DATABASE_NAME }} DATABASE_USER=${{ secrets.DATABASE_USER }} DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} docker-compose up -d

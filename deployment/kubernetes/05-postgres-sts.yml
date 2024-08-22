@@ -1,0 +1,219 @@
+# Headless Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresdb
+  namespace: default
+spec:
+  ports:
+  - port: 5433
+    targetPort: 5432
+    name: "postgresdb"
+  clusterIP: None
+  selector:
+    app: postgresdb
+
+---
+
+# StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresdb
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: postgresdb
+  serviceName: "postgresdb"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgresdb
+    spec:
+      containers:
+      - name: postgresdb
+        image: postgres:12-alpine
+        env:
+          - name: POSTGRES_DB
+            valueFrom:
+              configMapKeyRef:
+                name: app-configmap
+                key: DATABASE_NAME_AUTH
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: secret-env
+                key: DATABASE_USER
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secret-env
+                key: DATABASE_PASSWORD
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-auth-volume
+          mountPath: /var/lib/postgresql/postgresdb
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-auth-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: postgresdb-object
+#   namespace: default
+# spec:
+#   ports:
+#   - port: 5434
+#     targetPort: 5432
+#     name: "postgresdb-object"
+#   clusterIP: None
+#   selector:
+#     app: postgresdb-object
+
+# ---
+
+# apiVersion: apps/v1
+# kind: StatefulSet
+# metadata:
+#   name: postgresdb-object
+#   namespace: default
+# spec:
+#   selector:
+#     matchLabels:
+#       app: postgresdb-object
+#   serviceName: "postgresdb-object"
+#   replicas: 1
+#   template:
+#     metadata:
+#       labels:
+#         app: postgresdb-object
+#     spec:
+#       containers:
+#       - name: postgresdb-object
+#         image: postgres:12-alpine
+#         env:
+#           - name: POSTGRES_DB
+#             valueFrom:
+#               configMapKeyRef:
+#                 name: app-configmap
+#                 key: DATABASE_NAME_OBJECT
+#           - name: POSTGRES_USER
+#             valueFrom:
+#               secretKeyRef:
+#                 name: secret-env
+#                 key: DATABASE_USER
+#           - name: POSTGRES_PASSWORD
+#             valueFrom:
+#               secretKeyRef:
+#                 name: secret-env
+#                 key: DATABASE_PASSWORD
+#         resources:
+#           requests:
+#             memory: "64Mi"
+#             cpu: "250m"
+#           limits:
+#             memory: "128Mi"
+#             cpu: "500m"
+#         ports:
+#         - containerPort: 5432
+#         volumeMounts:
+#         - name: postgres-object-volume
+#           mountPath: /var/lib/postgresql/postgresdb-object
+#   volumeClaimTemplates:
+#   - metadata:
+#       name: postgres-object-volume
+#     spec:
+#       accessModes: [ "ReadWriteOnce" ]
+#       resources:
+#         requests:
+#           storage: 1Gi
+
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: postgresdb-image
+#   namespace: default
+# spec:
+#   ports:
+#   - port: 5435
+#     targetPort: 5432
+#     name: "postgresdb-image"
+#   clusterIP: None
+#   selector:
+#     app: postgresdb-image
+
+# ---
+
+# apiVersion: apps/v1
+# kind: StatefulSet
+# metadata:
+#   name: postgresdb-image
+#   namespace: default
+# spec:
+#   selector:
+#     matchLabels:
+#       app: postgresdb-image
+#   serviceName: "postgresdb-image"
+#   replicas: 1
+#   template:
+#     metadata:
+#       labels:
+#         app: postgresdb-image
+#     spec:
+#       containers:
+#       - name: postgresdb-image
+#         image: postgres:12-alpine
+#         env:
+#           - name: POSTGRES_DB
+#             valueFrom:
+#               configMapKeyRef:
+#                 name: app-configmap
+#                 key: DATABASE_NAME_IMAGE
+#           - name: POSTGRES_USER
+#             valueFrom:
+#               secretKeyRef:
+#                 name: secret-env
+#                 key: DATABASE_USER
+#           - name: POSTGRES_PASSWORD
+#             valueFrom:
+#               secretKeyRef:
+#                 name: secret-env
+#                 key: DATABASE_PASSWORD
+#         resources:
+#           requests:
+#             memory: "64Mi"
+#             cpu: "250m"
+#           limits:
+#             memory: "128Mi"
+#             cpu: "500m"
+#         ports:
+#         - containerPort: 5432
+#         volumeMounts:
+#         - name: postgres-image-volume
+#           mountPath: /var/lib/postgresql/postgresdb-image
+#   volumeClaimTemplates:
+#   - metadata:
+#       name: postgres-image-volume
+#     spec:
+#       accessModes: [ "ReadWriteOnce" ]
+#       resources:
+#         requests:
+#           storage: 1Gi

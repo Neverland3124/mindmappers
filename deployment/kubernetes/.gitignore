@@ -1,0 +1,2 @@
+# ignore all secret files in format of 0X-secret*.yml
+0?-secret*.yml

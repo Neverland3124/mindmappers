@@ -12,6 +12,7 @@ export class SocketService {
 
   connect() {
     this.socket = io(this.url, {
+      path: '/ws/object/socket.io',
       transports: ['websocket'],
     });
   }
