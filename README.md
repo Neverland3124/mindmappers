@@ -3,7 +3,7 @@
 ## What is Mindmappers
 - A collaborative mind-mapping tool designed to facilitate real-time brainstorming and idea organization for individuals and teams.
 - Monolith version: https://www.mindmappers.felixlyy.me/
-- ---Microservice version: https://mindmappers.neverland3124.me/ (too expensive to maintain)---
+- <s>Microservice version: https://mindmappers.neverland3124.me/ (too expensive to maintain)</s>
 
 ## Why Mindmappers-microservice?
 - Try the possibility of microservice and deploy with Kubernetes
